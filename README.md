@@ -1,73 +1,83 @@
-# BOZ Verified Fit v12.0
+# BOZ Verified Fit — IT Staffing SaaS Platform
 
-IT Staffing Profile Builder — Define your ideal tech talent with precision.
+**Version:** 13.1 (v4 beta) | **Stack:** React+Vite · Supabase · Anthropic Claude · Vercel  
+**Status:** Functional prototype — all 6 modules active
 
-## Quick Start (Local)
+## What is this?
+
+BOZ Verified Fit is an IT staffing platform for BOZ USA connecting 6 roles through a structured hiring workflow:
+
+1. **Client** → Submits job descriptions (JD upload + AI analysis + manual form)
+2. **Recruiter** → Reviews profiles, adds notes/questions, passes to Ana
+3. **Ana (Talent Discovery)** → Soft skills evaluation, personality assessment
+4. **Admin** → Full pipeline management (kanban board, candidate assignment, ATS)
+5. **Sales** → Client management, invite links, candidate delivery control
+6. **Finance** → Revenue calculator per profile, viability analysis per client
+
+## Quick Start
 
 ```bash
-cp .env.example .env    # Fill in your keys
 npm install
-npm run dev
+cp .env.example .env   # Fill in your Supabase + Anthropic keys
+npm run dev             # http://localhost:5173
+```
+
+## Project Structure
+
+```
+boz-verified-fit/
+├── api/                           # Vercel serverless API (9 endpoints)
+│   ├── admin.js                   # Profiles, candidates, ATS, finance pricing, rate limit
+│   ├── ana.js                     # Soft skills operations
+│   ├── auth.js                    # Password login + user creation + role lookup
+│   ├── claude.js                  # Anthropic AI proxy
+│   ├── client.js                  # Client profile submission + JD storage
+│   ├── recruiter.js               # Recruiter operations
+│   ├── roles.js                   # User/role CRUD
+│   ├── pdf/[id].js                # Dynamic PDF generation
+│   └── review/[id].js             # Interactive client review page
+├── docs/                          # Complete documentation
+│   ├── ARCHITECTURE.md            # System design & data flow
+│   ├── API-REFERENCE.md           # All endpoints documented
+│   ├── SETUP-GUIDE.md             # Setup from zero
+│   ├── DEVELOPMENT-HISTORY.md     # Version history & decisions
+│   ├── WORKFLOW.md                # Business logic & user flows
+│   ├── MIGRATION-DOTNET-AZURE.md  # .NET + Azure migration guide
+│   └── PROMPTS-FOR-AI.md         # AI prompts for continuing development
+├── src/
+│   ├── App.jsx                    # Single-file React app (~2800 lines)
+│   ├── data.js                    # Constants, AI prompts, tech catalogs
+│   └── main.jsx                   # Entry point
+├── .env.example                   # Environment variables template
+├── package.json                   # Dependencies (React 18 + Vite 5)
+├── vercel.json                    # API routing config
+└── vite.config.js                 # Build config
 ```
 
 ## Environment Variables
 
-| Variable | Where | Required | Description |
-|----------|-------|----------|-------------|
-| `VITE_DEV_MODE` | Vercel + .env | No | Set `true` for dev buttons, omit for production |
-| `VITE_SUPABASE_URL` | Vercel + .env | Yes | Supabase project URL |
-| `VITE_SUPABASE_ANON_KEY` | Vercel + .env | Yes | Supabase anon (public) key |
-| `SUPABASE_SERVICE_KEY` | Vercel only | Yes | Supabase service_role key (secret) |
-| `ANTHROPIC_API_KEY` | Vercel only | Yes | Claude API key for AI features |
-| `VITE_EMAILJS_SERVICE_ID` | Vercel + .env | No | EmailJS service ID |
-| `VITE_EMAILJS_TEMPLATE_ID` | Vercel + .env | No | EmailJS template ID |
-| `VITE_EMAILJS_PUBLIC_KEY` | Vercel + .env | No | EmailJS public key |
-| `VITE_BASE_URL` | Vercel + .env | No | Custom domain (defaults to window.location.origin) |
+| Variable | Where | Description |
+|---|---|---|
+| `VITE_SUPABASE_URL` | Vercel + .env | Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Vercel + .env | Supabase anon key |
+| `SUPABASE_SERVICE_KEY` | Vercel ONLY | Service role key (never expose) |
+| `ANTHROPIC_API_KEY` | Vercel ONLY | Claude API key |
+| `VITE_DEV_MODE` | Optional | `"true"` enables dev login buttons. REMOVE for production. |
 
-## Deploy to Vercel
+## Key Security Features
 
-1. Push to GitHub
-2. Connect repo in Vercel
-3. Add environment variables (above)
-4. **Do NOT set `VITE_DEV_MODE`** in production — this disables dev login buttons
+- **Password authentication** (email + password via Supabase Auth)
+- **Rate limiting** (120 req/min admin, 15 req/min auth per IP)
+- **Input sanitization** (strips XSS vectors from all text inputs)
+- **Row Level Security** on all Supabase tables
+- **Review link authorization** (locked until Admin approves)
+- **Soft delete** with audit trail
+- **Service-side only keys** (Supabase service key + Anthropic key never reach client)
 
-## Architecture
+## Documentation
 
-```
-api/
-  admin.js       — Admin + Recruiter endpoints (profiles, candidates, assignments)
-  ana.js         — Ana/psychologist soft skills endpoints
-  auth.js        — Role lookup from Supabase roles table
-  claude.js      — Claude API proxy (model-locked, token-capped)
-  client.js      — Client profile CRUD operations
-  recruiter.js   — Recruiter review, accept/reject, questions
-  roles.js       — User/role management (admin only)
-  pdf/[id].js    — Serves PDF HTML by profile UUID
-  review/[id].js — Interactive candidate review page
-src/
-  App.jsx        — React SPA (Login, Admin ATS, Recruiter, Ana, Client Form, Sales, Finance)
-  data.js        — Constants, categories, roles, tools
-  main.jsx       — Entry point
-```
+Start with `docs/SETUP-GUIDE.md` for initial setup, then `docs/ARCHITECTURE.md` for system understanding. For migration to .NET + Azure, see `docs/MIGRATION-DOTNET-AZURE.md`.
 
-## Modules
+## License
 
-| Module | Role | Color | Description |
-|--------|------|-------|-------------|
-| Admin | admin | Navy #0D2550 | Pipeline, candidates, users, full oversight |
-| Recruiter | recruiter | Orange #f97316 | Review profiles, approve/reject, add notes |
-| Ana | ana | Purple #7C3AED | Soft skills evaluation (blocked until recruiter approves) |
-| Sales | sales | Green #059669 | Links dashboard, quick access |
-| Finance | finance | Blue #0369a1 | Placeholder — coming soon |
-| Client | (public) | White | 8-step profile form + AI job description |
-
-## Security
-
-- All data operations go through server APIs (never direct Supabase from client)
-- Admin endpoints require role verification via roles table
-- Client endpoints verify JWT token with Supabase Auth
-- Dev mode tokens only accepted when VITE_DEV_MODE=true
-- Claude proxy: model locked, max 2000 tokens, origin check
-- Input sanitization on all API endpoints
-- UUID validation on all ID parameters
-- Body size limits on all endpoints
+Proprietary — BOZ USA. All rights reserved.
