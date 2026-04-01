@@ -2,7 +2,7 @@
 export const ADMIN_EMAIL="psicologorafaelbaez@gmail.com";
 export const ANA_EMAIL="ana@bozusa.com";
 export const RECRUITER_EMAIL="recruiter@bozusa.com";
-export const APP_VERSION="12.1"; // v12.1 — AI suggestions + Admin omniscient + Sales metrics
+export const APP_VERSION="12.2"; // v12.2 — Soft delete, auto-match, review redesign, client branding
 
 // Role system
 export const VALID_ROLES=["admin","sales","recruiter","ana","finance"];

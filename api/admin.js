@@ -63,7 +63,7 @@ export default async function handler(req, res) {
 
     // ═══ PROFILES ═══
     if (req.method === "GET" && !action) {
-      const r = await fetch(`${url}/rest/v1/profiles?order=created_at.desc&select=id,created_at,client_name,client_company,client_email,role,category,seniority,experience,headcount,status,start_date,profile_data`, { headers: H });
+      const r = await fetch(`${url}/rest/v1/profiles?deleted_at=is.null&order=created_at.desc&select=id,created_at,client_name,client_company,client_email,role,category,seniority,experience,headcount,status,start_date,profile_data`, { headers: H });
       if (!r.ok) return res.status(r.status).json({ error: await r.text() });
       return res.status(200).json(await r.json());
     }
@@ -79,7 +79,7 @@ export default async function handler(req, res) {
 
     // ═══ CANDIDATES ═══
     if (action === "list_candidates") {
-      const r = await fetch(`${url}/rest/v1/candidates?order=created_at.desc`, { headers: H });
+      const r = await fetch(`${url}/rest/v1/candidates?deleted_at=is.null&order=created_at.desc`, { headers: H });
       if (!r.ok) return res.status(r.status).json({ error: await r.text() });
       return res.status(200).json(await r.json());
     }
@@ -95,14 +95,60 @@ export default async function handler(req, res) {
 
     if (action === "delete_candidate") {
       const { id } = req.body;
-      await fetch(`${url}/rest/v1/candidates?id=eq.${id}`, { method: "DELETE", headers: H });
+      if (!id) return res.status(400).json({ error: "id required" });
+      // Soft delete
+      await fetch(`${url}/rest/v1/candidates?id=eq.${id}`, { method: "PATCH", headers: { ...H, "Prefer": "return=minimal" }, body: JSON.stringify({ deleted_at: new Date().toISOString() }) });
+      // Audit log
+      await fetch(`${url}/rest/v1/audit_log`, { method: "POST", headers: H, body: JSON.stringify({ action: "delete", table_name: "candidates", record_id: id, performed_by: admin.email, details: {} }) });
       return res.status(200).json({ ok: true });
+    }
+
+    // ═══ SOFT DELETE PROFILE ═══
+    if (action === "soft_delete_profile") {
+      const { id } = req.body;
+      if (!id) return res.status(400).json({ error: "id required" });
+      if (admin.role !== "admin") return res.status(403).json({ error: "Admin only" });
+      await fetch(`${url}/rest/v1/profiles?id=eq.${id}`, { method: "PATCH", headers: { ...H, "Prefer": "return=minimal" }, body: JSON.stringify({ deleted_at: new Date().toISOString() }) });
+      await fetch(`${url}/rest/v1/audit_log`, { method: "POST", headers: H, body: JSON.stringify({ action: "delete", table_name: "profiles", record_id: id, performed_by: admin.email, details: {} }) });
+      return res.status(200).json({ ok: true });
+    }
+
+    // ═══ RESTORE ═══
+    if (action === "restore") {
+      const { id, table_name } = req.body;
+      if (!id || !table_name) return res.status(400).json({ error: "id and table_name required" });
+      if (admin.role !== "admin") return res.status(403).json({ error: "Admin only" });
+      const valid = ["profiles", "candidates", "profile_candidates"];
+      if (!valid.includes(table_name)) return res.status(400).json({ error: "Invalid table" });
+      await fetch(`${url}/rest/v1/${table_name}?id=eq.${id}`, { method: "PATCH", headers: { ...H, "Prefer": "return=minimal" }, body: JSON.stringify({ deleted_at: null }) });
+      await fetch(`${url}/rest/v1/audit_log`, { method: "POST", headers: H, body: JSON.stringify({ action: "restore", table_name, record_id: id, performed_by: admin.email, details: {} }) });
+      return res.status(200).json({ ok: true });
+    }
+
+    // ═══ LIST DELETED (Trash) ═══
+    if (action === "list_deleted") {
+      if (admin.role !== "admin") return res.status(403).json({ error: "Admin only" });
+      const [pR, cR] = await Promise.all([
+        fetch(`${url}/rest/v1/profiles?deleted_at=not.is.null&select=id,role,client_name,client_company,seniority,deleted_at&order=deleted_at.desc`, { headers: H }),
+        fetch(`${url}/rest/v1/candidates?deleted_at=not.is.null&select=id,name,email,seniority,deleted_at&order=deleted_at.desc`, { headers: H }),
+      ]);
+      const profiles = pR.ok ? await pR.json() : [];
+      const candidates = cR.ok ? await cR.json() : [];
+      return res.status(200).json({ profiles, candidates });
+    }
+
+    // ═══ AUDIT LOG ═══
+    if (action === "get_audit_log") {
+      if (admin.role !== "admin") return res.status(403).json({ error: "Admin only" });
+      const r = await fetch(`${url}/rest/v1/audit_log?order=created_at.desc&limit=50`, { headers: H });
+      if (!r.ok) return res.status(r.status).json({ error: await r.text() });
+      return res.status(200).json(await r.json());
     }
 
     // ═══ ASSIGNMENTS (profile ↔ candidate) ═══
     if (action === "list_assignments") {
       const { profile_id } = req.method === "GET" ? req.query : req.body;
-      const q = profile_id ? `?profile_id=eq.${profile_id}&select=*,candidates(*)` : "?select=*,candidates(*)";
+      const q = profile_id ? `?profile_id=eq.${profile_id}&deleted_at=is.null&select=*,candidates(*)` : "?deleted_at=is.null&select=*,candidates(*)";
       const r = await fetch(`${url}/rest/v1/profile_candidates${q}&order=created_at.desc`, { headers: H });
       if (!r.ok) return res.status(r.status).json({ error: await r.text() });
       return res.status(200).json(await r.json());

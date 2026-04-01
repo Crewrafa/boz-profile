@@ -263,6 +263,10 @@ function Admin({user}){
   const isMob=useW()<640;
   // Phase 3: Admin alerts
   const[adminAlerts,setAdminAlerts]=useState([]);const[alertsLoading,setAlertsLoading]=useState(false);
+  // Trash (soft delete)
+  const[trashData,setTrashData]=useState({profiles:[],candidates:[]});const[trashLoading,setTrashLoading]=useState(false);
+  // Auto-match
+  const[autoMatches,setAutoMatches]=useState([]);const[matchLoading,setMatchLoading]=useState(false);
 
   // Load data
   const load=useCallback(async()=>{
@@ -426,6 +430,39 @@ function Admin({user}){
   const deleteDoc=async(docId,filePath,profileId)=>{
     try{await fetch("/api/admin",{method:"POST",headers:ADM_AUTH(),body:JSON.stringify({action:"delete_document",id:docId,file_path:filePath})});
       if(profileId)await loadDocs(profileId);setCopyToast("✅ Document removed");setTimeout(()=>setCopyToast(""),2500)}catch(e){setCopyToast("⚠️ Delete failed");setTimeout(()=>setCopyToast(""),3000)}
+  };
+
+  // ═══ SOFT DELETE ═══
+  const softDeleteProfile=async(id)=>{
+    if(!confirm("Move this profile to trash?"))return;
+    try{await fetch("/api/admin",{method:"POST",headers:ADM_AUTH(),body:JSON.stringify({action:"soft_delete_profile",id})});
+      setPs(p=>p.filter(x=>x.id!==id));if(selP?.id===id){setSelP(null);setView("kanban")}
+      show("✅ Profile moved to trash");
+    }catch(e){show("⚠️ "+e.message)}
+  };
+  const softDeleteCandidate=async(id)=>{
+    if(!confirm("Move this candidate to trash?"))return;
+    try{await fetch("/api/admin",{method:"POST",headers:ADM_AUTH(),body:JSON.stringify({action:"delete_candidate",id})});
+      setCands(p=>p.filter(x=>x.id!==id));show("✅ Candidate moved to trash");
+    }catch(e){show("⚠️ "+e.message)}
+  };
+  const loadTrash=async()=>{
+    setTrashLoading(true);
+    try{const r=await fetch("/api/admin",{method:"POST",headers:ADM_AUTH(),body:JSON.stringify({action:"list_deleted"})});
+      if(r.ok)setTrashData(await r.json());
+    }catch(e){console.warn("Trash load:",e.message)}finally{setTrashLoading(false)}
+  };
+  const restoreItem=async(id,tableName)=>{
+    try{await fetch("/api/admin",{method:"POST",headers:ADM_AUTH(),body:JSON.stringify({action:"restore",id,table_name:tableName})});
+      show("✅ Restored");await loadTrash();await load();
+    }catch(e){show("⚠️ "+e.message)}
+  };
+
+  // ═══ AUTO-MATCH ═══
+  const runAutoMatch=(profile)=>{
+    if(!profile||!cands.length){setAutoMatches([]);return}
+    const scored=cands.map(c=>{const ms=calcMatch(c,profile);return{candidate:c,score:ms}}).filter(x=>x.score>20).sort((a,b)=>b.score-a.score).slice(0,5);
+    setAutoMatches(scored);
   };
 
   // Copy review link
@@ -668,7 +705,7 @@ function Admin({user}){
           <div style={{display:"flex",flexDirection:"column",gap:8}}>
             {items.map((p,idx)=>(
               <div key={p.id} draggable onDragStart={e=>onDragStart(e,p.id)}
-                onClick={()=>{setSelP(p);loadAssigns(p.id);setView("detail")}}
+                onClick={()=>{setSelP(p);loadAssigns(p.id);setView("detail");runAutoMatch(p)}}
                 style={{background:"#fff",borderRadius:DS.radius.lg,padding:"14px 16px",border:`1px solid ${DS.surface.border}`,cursor:"grab",transition:`all .25s ${DS.ease.snap}`,boxShadow:DS.shadow.sm,animation:`fadeUp .4s ${idx*0.06}s both`}}
                 onMouseEnter={e=>{e.currentTarget.style.boxShadow=DS.shadow.md;e.currentTarget.style.transform="translateY(-2px)"}}
                 onMouseLeave={e=>{e.currentTarget.style.boxShadow=DS.shadow.sm;e.currentTarget.style.transform="none"}}>
@@ -705,6 +742,8 @@ function Admin({user}){
                   {Object.entries(STATUS_LABELS).map(([k,v])=><option key={k} value={k} style={{color:"#000"}}>{v}</option>)}
                 </select>
                 <a href={`/api/pdf/${selP.id}`} target="_blank" rel="noopener noreferrer" style={{fontSize:11,color:"#fff",border:"1px solid rgba(255,255,255,0.15)",borderRadius:DS.radius.sm,padding:"6px 14px",textDecoration:"none",fontFamily:DS.font.body,transition:`all .2s ${DS.ease.default}`}}>📄 PDF</a>
+                <button type="button" onClick={()=>copyReviewLink(selP.id)} style={{fontSize:11,color:"#fff",border:"1px solid rgba(255,255,255,0.15)",borderRadius:DS.radius.sm,padding:"6px 14px",background:"none",cursor:"pointer",fontFamily:DS.font.body}}>🔗 Share</button>
+                {isAdmin&&<button type="button" onClick={()=>softDeleteProfile(selP.id)} style={{fontSize:11,color:"#fca5a5",border:"1px solid rgba(252,165,165,0.25)",borderRadius:DS.radius.sm,padding:"6px 14px",background:"rgba(239,68,68,0.08)",cursor:"pointer",fontFamily:DS.font.body}}>🗑️</button>}
               </div>
             </div>
           </div>
@@ -739,6 +778,18 @@ function Admin({user}){
               <button type="button" onClick={()=>setShowAddCand(true)} style={{fontSize:12,background:`linear-gradient(135deg,${DS.brand.navy900},${DS.brand.blue700})`,color:"#fff",border:"none",borderRadius:DS.radius.md,padding:"8px 18px",cursor:"pointer",fontFamily:DS.font.heading,fontWeight:600,boxShadow:DS.shadow.blue,transition:`all .2s ${DS.ease.snap}`}}>+ Assign</button>
             </div>
           </div>
+          {/* Auto-match suggestions */}
+          {autoMatches.length>0&&!assigns.length&&(<div style={{background:`linear-gradient(135deg,${DS.brand.blue50},#fff)`,borderRadius:DS.radius.xl,padding:"16px 18px",marginBottom:14,border:`1px solid rgba(27,111,232,0.08)`}}>
+            <div style={{fontSize:11,fontWeight:700,color:DS.brand.blue700,textTransform:"uppercase",letterSpacing:"0.04em",fontFamily:DS.font.heading,marginBottom:10}}>🎯 Suggested Matches from Talent Pool</div>
+            <div style={{display:"flex",flexDirection:"column",gap:6}}>
+              {autoMatches.slice(0,3).map(({candidate:c,score})=>{const col=score>=80?"#059669":score>=60?"#f59e0b":"#dc2626";return(
+                <div key={c.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 14px",background:"#fff",borderRadius:DS.radius.lg,border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm}}>
+                  <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:32,height:32,borderRadius:"50%",background:`linear-gradient(135deg,${DS.brand.navy900},${DS.brand.blue700})`,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:11,fontWeight:700,fontFamily:DS.font.heading}}>{(c.name||"?").split(" ").map(w=>w[0]).join("").substring(0,2)}</div><div><div style={{fontSize:12,fontWeight:600,color:DS.text.h1,fontFamily:DS.font.heading}}>{c.name}</div><div style={{fontSize:10,color:DS.text.muted,fontFamily:DS.font.body}}>{c.seniority} · {(c.skills||[]).slice(0,3).join(", ")}</div></div></div>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:16,fontWeight:800,color:col,fontFamily:DS.font.heading}}>{score}%</span><button type="button" onClick={()=>{assignCand(c.id,score);setAutoMatches(p=>p.filter(x=>x.candidate.id!==c.id))}} style={{fontSize:10,background:`linear-gradient(135deg,${DS.brand.navy900},${DS.brand.blue700})`,color:"#fff",border:"none",borderRadius:DS.radius.sm,padding:"5px 12px",cursor:"pointer",fontFamily:DS.font.heading,fontWeight:600}}>Assign</button></div>
+                </div>
+              )})}
+            </div>
+          </div>)}
           {/* Assigned candidates — dark navy card style */}
           {assigns.map((a,idx)=>{
             const c=a.candidates||{};const ms=a.match_score||0;
@@ -837,6 +888,7 @@ function Admin({user}){
             {id:"ana_view",icon:"🧠",label:"Ana View"},
             {id:"sales_view",icon:"💼",label:"Sales View"},
             {id:"client_view",icon:"👁️",label:"Client View"},
+            {id:"trash",icon:"🗑️",label:"Trash"},
           ]:[]),
         ].map(nav=>{
           const active=view===nav.id;
@@ -1367,6 +1419,37 @@ function Admin({user}){
         })}
       </div>
     </div>)}
+    {/* TRASH VIEW */}
+    {view==="trash"&&isAdmin&&(<div style={{position:"fixed",inset:0,zIndex:55,background:"rgba(15,23,42,0.5)",backdropFilter:"blur(3px)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={()=>setView("kanban")}>
+      <div style={{background:"#fff",borderRadius:DS.radius.xxl,padding:28,maxWidth:700,width:"100%",maxHeight:"85vh",overflowY:"auto",animation:"fadeUp .25s both",boxShadow:DS.shadow.lg}} onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+          <div><div style={{fontSize:18,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading}}>🗑️ Trash</div><div style={{fontSize:12,color:DS.text.muted,fontFamily:DS.font.body,marginTop:2}}>Deleted profiles and candidates — restore anytime</div></div>
+          <button type="button" onClick={()=>setView("kanban")} style={{background:DS.surface.sunken,border:"none",width:32,height:32,borderRadius:DS.radius.md,fontSize:14,cursor:"pointer",color:DS.text.faint}}>✕</button>
+        </div>
+        {!trashData.profiles.length&&!trashData.candidates.length&&!trashLoading&&<button type="button" onClick={loadTrash} style={{width:"100%",background:`linear-gradient(135deg,${DS.brand.navy900},${DS.brand.blue700})`,color:"#fff",border:"none",borderRadius:DS.radius.md,padding:14,fontSize:14,fontWeight:600,cursor:"pointer",fontFamily:DS.font.heading,boxShadow:DS.shadow.blue}}>Load Trash</button>}
+        {trashLoading&&<Spinner text="Loading trash..."/>}
+        {trashData.profiles.length>0&&<div style={{marginBottom:16}}>
+          <div style={{fontSize:12,fontWeight:700,color:DS.text.muted,textTransform:"uppercase",letterSpacing:"0.04em",fontFamily:DS.font.heading,marginBottom:8}}>Profiles ({trashData.profiles.length})</div>
+          {trashData.profiles.map(p=>(
+            <div key={p.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",borderRadius:DS.radius.lg,border:`1px solid ${DS.surface.border}`,marginBottom:6,background:DS.surface.page}}>
+              <div><div style={{fontSize:13,fontWeight:600,color:DS.text.h1,fontFamily:DS.font.heading}}>{p.role} — {p.seniority}</div><div style={{fontSize:11,color:DS.text.muted,fontFamily:DS.font.body}}>{p.client_name} ({p.client_company}) · Deleted {new Date(p.deleted_at).toLocaleDateString()}</div></div>
+              <button type="button" onClick={()=>restoreItem(p.id,"profiles")} style={{fontSize:11,background:"#059669",color:"#fff",border:"none",borderRadius:DS.radius.sm,padding:"6px 14px",cursor:"pointer",fontFamily:DS.font.heading,fontWeight:600}}>↩ Restore</button>
+            </div>
+          ))}
+        </div>}
+        {trashData.candidates.length>0&&<div>
+          <div style={{fontSize:12,fontWeight:700,color:DS.text.muted,textTransform:"uppercase",letterSpacing:"0.04em",fontFamily:DS.font.heading,marginBottom:8}}>Candidates ({trashData.candidates.length})</div>
+          {trashData.candidates.map(c=>(
+            <div key={c.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",borderRadius:DS.radius.lg,border:`1px solid ${DS.surface.border}`,marginBottom:6,background:DS.surface.page}}>
+              <div><div style={{fontSize:13,fontWeight:600,color:DS.text.h1,fontFamily:DS.font.heading}}>{c.name}</div><div style={{fontSize:11,color:DS.text.muted,fontFamily:DS.font.body}}>{c.email||"—"} · {c.seniority||"—"} · Deleted {new Date(c.deleted_at).toLocaleDateString()}</div></div>
+              <button type="button" onClick={()=>restoreItem(c.id,"candidates")} style={{fontSize:11,background:"#059669",color:"#fff",border:"none",borderRadius:DS.radius.sm,padding:"6px 14px",cursor:"pointer",fontFamily:DS.font.heading,fontWeight:600}}>↩ Restore</button>
+            </div>
+          ))}
+        </div>}
+        {(trashData.profiles.length>0||trashData.candidates.length>0)&&<button type="button" onClick={loadTrash} style={{marginTop:12,fontSize:12,color:DS.text.muted,background:"none",border:`1px solid ${DS.surface.border}`,borderRadius:DS.radius.md,padding:"8px 16px",cursor:"pointer",fontFamily:DS.font.body,width:"100%"}}>↻ Refresh</button>}
+      </div>
+    </div>)}
+
     {copyToast&&<div style={{position:"fixed",top:20,left:"50%",transform:"translateX(-50%)",zIndex:100,background:copyToast.includes("⚠️")?"#dc2626":"#0D2550",color:"#fff",padding:"12px 28px",borderRadius:12,fontSize:13,fontWeight:500,boxShadow:"0 8px 32px rgba(13,37,80,0.3)",animation:"fadeUp .3s both",maxWidth:"90vw",textAlign:"center"}}>{copyToast}</div>}
     <Footer/>
     </div>
@@ -2186,7 +2269,7 @@ function ClientForm({user}){
     {toast&&<div style={{position:"fixed",top:20,left:"50%",transform:"translateX(-50%)",zIndex:100,background:"#0D2550",color:"#fff",padding:"12px 28px",borderRadius:12,fontSize:13,fontWeight:500,boxShadow:"0 8px 32px rgba(13,37,80,0.3)",animation:"fadeUp .3s both",whiteSpace:"nowrap",maxWidth:"90vw",overflow:"hidden",textOverflow:"ellipsis"}}>{toast}</div>}
     <div style={{background:`linear-gradient(135deg,${DS.brand.navy900},#1B3A70 60%,${DS.brand.blue700})`,padding:isMob?"16px 0 12px":"20px 0 28px",position:"sticky",top:0,zIndex:30,boxShadow:"0 4px 24px rgba(13,37,80,0.2)",overflow:"hidden"}}>
       <HeaderBG/>
-      <div style={{maxWidth:880,margin:"0 auto",padding:"0 16px",position:"relative",zIndex:1}}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}><div style={{fontSize:isMob?18:22,fontWeight:800,color:"#fff",letterSpacing:1.5,fontFamily:DS.font.heading}}>BOZ<span style={{color:DS.brand.cyan600}}>.</span>{!isMob&&<span style={{fontSize:13,fontWeight:400,marginLeft:10,opacity:.6,fontFamily:DS.font.body}}>Verified Fit</span>}</div><div style={{display:"flex",gap:6}}><button type="button" onClick={()=>setShowH(!showH)} style={{fontSize:isMob?11:12,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:DS.radius.md,padding:isMob?"5px 10px":"7px 14px",color:"rgba(255,255,255,0.85)",cursor:"pointer",fontFamily:DS.font.body,display:"flex",alignItems:"center",gap:5,fontWeight:500}}>📂{!isMob&&" History"}<span style={{background:"rgba(255,255,255,0.15)",padding:"1px 7px",borderRadius:DS.radius.pill,fontSize:10}}>{myPs.length}</span></button><button type="button" onClick={handleReset} style={{fontSize:isMob?11:12,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:DS.radius.md,padding:isMob?"5px 10px":"7px 14px",color:"rgba(255,255,255,0.85)",cursor:"pointer",fontFamily:DS.font.body}}>↺</button><button type="button" onClick={signOut} style={{fontSize:isMob?11:12,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:DS.radius.md,padding:isMob?"5px 10px":"7px 14px",color:"rgba(255,255,255,0.55)",cursor:"pointer",fontFamily:DS.font.body}}>Out</button></div></div>
+      <div style={{maxWidth:880,margin:"0 auto",padding:"0 16px",position:"relative",zIndex:1}}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}><div style={{fontSize:isMob?18:22,fontWeight:800,color:"#fff",letterSpacing:1.5,fontFamily:DS.font.heading}}>BOZ<span style={{color:DS.brand.cyan600}}>.</span>{!isMob&&<span style={{fontSize:13,fontWeight:400,marginLeft:10,opacity:.6,fontFamily:DS.font.body}}>{cComp?`for ${cComp}`:"Verified Fit"}</span>}</div><div style={{display:"flex",gap:6}}><button type="button" onClick={()=>setShowH(!showH)} style={{fontSize:isMob?11:12,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:DS.radius.md,padding:isMob?"5px 10px":"7px 14px",color:"rgba(255,255,255,0.85)",cursor:"pointer",fontFamily:DS.font.body,display:"flex",alignItems:"center",gap:5,fontWeight:500}}>📂{!isMob&&" History"}<span style={{background:"rgba(255,255,255,0.15)",padding:"1px 7px",borderRadius:DS.radius.pill,fontSize:10}}>{myPs.length}</span></button><button type="button" onClick={handleReset} style={{fontSize:isMob?11:12,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:DS.radius.md,padding:isMob?"5px 10px":"7px 14px",color:"rgba(255,255,255,0.85)",cursor:"pointer",fontFamily:DS.font.body}}>↺</button><button type="button" onClick={signOut} style={{fontSize:isMob?11:12,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:DS.radius.md,padding:isMob?"5px 10px":"7px 14px",color:"rgba(255,255,255,0.55)",cursor:"pointer",fontFamily:DS.font.body}}>Out</button></div></div>
       {!showH&&<div style={{padding:"8px 0 0"}}>
         {/* Progress dots + lines */}
         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"center",gap:0}}>
