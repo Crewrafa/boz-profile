@@ -1,0 +1,256 @@
+// BOZ Admin API — profiles, candidates, assignments
+// Accessible by: admin + recruiter roles
+
+async function verifyAccess(req, url, key) {
+  const token = (req.headers.authorization || "").replace("Bearer ", "");
+  if (!token) return null;
+  const isProduction = process.env.VERCEL === "1" && process.env.VITE_DEV_MODE !== "true";
+  // Dev tokens
+  const devMap = { "dev": { email: "psicologorafaelbaez@gmail.com", role: "admin" }, "dev-recruiter": { email: "recruiter@bozusa.com", role: "recruiter" }, "dev-sales": { email: "sales@bozusa.com", role: "sales" } };
+  if (devMap[token] && !isProduction) return devMap[token];
+  if (devMap[token]) return null;
+  try {
+    const r = await fetch(`${url}/auth/v1/user`, { headers: { "Authorization": `Bearer ${token}`, "apikey": key } });
+    if (!r.ok) return null;
+    const user = await r.json();
+    // Check roles table
+    const rr = await fetch(`${url}/rest/v1/roles?email=eq.${encodeURIComponent(user.email)}&active=eq.true&select=role`, { headers: { "apikey": key, "Authorization": `Bearer ${key}` } });
+    if (!rr.ok) return null;
+    const roles = await rr.json();
+    if (!roles.length || !["admin", "recruiter", "sales"].includes(roles[0].role)) return null;
+    return { ...user, role: roles[0].role };
+  } catch { return null; }
+}
+
+export default async function handler(req, res) {
+  const url = process.env.VITE_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  if (!url || !key) return res.status(500).json({ error: "DB not configured" });
+
+  const admin = await verifyAccess(req, url, key);
+  if (!admin) return res.status(403).json({ error: "Unauthorized" });
+
+  const H = { "apikey": key, "Authorization": `Bearer ${key}`, "Content-Type": "application/json" };
+  const action = req.query.action || req.body?.action;
+
+  // Helper: fetch from Supabase with error check
+  async function sbFetch(path, opts = {}) {
+    const r = await fetch(`${url}${path}`, { headers: H, ...opts, headers: { ...H, ...(opts.headers || {}) } });
+    if (!r.ok) {
+      const errText = await r.text().catch(() => "Unknown error");
+      const err = new Error(errText);
+      err.status = r.status;
+      throw err;
+    }
+    const text = await r.text();
+    if (!text) return null;
+    return JSON.parse(text);
+  }
+
+  try {
+    // ═══ HEALTH CHECK ═══
+    if (req.method === "GET" && action === "health") {
+      const keyPreview = key ? `${key.substring(0,10)}...${key.substring(key.length-5)}` : "NOT SET";
+      const keyParts = key ? key.split(".").length : 0;
+      try {
+        const r = await fetch(`${url}/rest/v1/profiles?select=id&limit=1`, { headers: H });
+        const ok = r.ok;
+        return res.status(200).json({ db: ok ? "connected" : "error", keyParts, keyPreview, urlSet: !!url });
+      } catch(e) {
+        return res.status(200).json({ db: "error", error: e.message, keyParts, keyPreview, urlSet: !!url });
+      }
+    }
+
+    // ═══ PROFILES ═══
+    if (req.method === "GET" && !action) {
+      const r = await fetch(`${url}/rest/v1/profiles?order=created_at.desc&select=id,created_at,client_name,client_company,client_email,role,category,seniority,experience,headcount,status,start_date,profile_data`, { headers: H });
+      if (!r.ok) return res.status(r.status).json({ error: await r.text() });
+      return res.status(200).json(await r.json());
+    }
+
+    if (req.method === "PATCH" && !action) {
+      const { id, status } = req.body;
+      if (!id || !status) return res.status(400).json({ error: "id and status required" });
+      const valid = ["new", "pending_review", "pending_soft", "in_progress", "sourcing", "filled", "closed"];
+      if (!valid.includes(status)) return res.status(400).json({ error: "Invalid status" });
+      await fetch(`${url}/rest/v1/profiles?id=eq.${id}`, { method: "PATCH", headers: { ...H, "Prefer": "return=minimal" }, body: JSON.stringify({ status }) });
+      return res.status(200).json({ ok: true });
+    }
+
+    // ═══ CANDIDATES ═══
+    if (action === "list_candidates") {
+      const r = await fetch(`${url}/rest/v1/candidates?order=created_at.desc`, { headers: H });
+      if (!r.ok) return res.status(r.status).json({ error: await r.text() });
+      return res.status(200).json(await r.json());
+    }
+
+    if (action === "add_candidate") {
+      const { candidate } = req.body;
+      if (!candidate?.name) return res.status(400).json({ error: "Name required" });
+      const r = await fetch(`${url}/rest/v1/candidates`, { method: "POST", headers: { ...H, "Prefer": "return=representation" }, body: JSON.stringify(candidate) });
+      if (!r.ok) { const err = await r.text(); return res.status(r.status).json({ error: err }); }
+      const d = await r.json();
+      return res.status(200).json(d[0] || d);
+    }
+
+    if (action === "delete_candidate") {
+      const { id } = req.body;
+      await fetch(`${url}/rest/v1/candidates?id=eq.${id}`, { method: "DELETE", headers: H });
+      return res.status(200).json({ ok: true });
+    }
+
+    // ═══ ASSIGNMENTS (profile ↔ candidate) ═══
+    if (action === "list_assignments") {
+      const { profile_id } = req.method === "GET" ? req.query : req.body;
+      const q = profile_id ? `?profile_id=eq.${profile_id}&select=*,candidates(*)` : "?select=*,candidates(*)";
+      const r = await fetch(`${url}/rest/v1/profile_candidates${q}&order=created_at.desc`, { headers: H });
+      if (!r.ok) return res.status(r.status).json({ error: await r.text() });
+      return res.status(200).json(await r.json());
+    }
+
+    if (action === "assign_candidate") {
+      const { profile_id, candidate_id, match_score, notes } = req.body;
+      if (!profile_id || !candidate_id) return res.status(400).json({ error: "IDs required" });
+      const r = await fetch(`${url}/rest/v1/profile_candidates`, { method: "POST", headers: { ...H, "Prefer": "return=representation" },
+        body: JSON.stringify({ profile_id, candidate_id, match_score: match_score || 0, notes: notes || "", status: "data_verification" }) });
+      if (!r.ok) { const err = await r.text(); return res.status(r.status).json({ error: err }); }
+      const d = await r.json();
+      return res.status(200).json(d[0] || d);
+    }
+
+    if (action === "update_assignment") {
+      const { id, status, match_score, notes } = req.body;
+      if (!id) return res.status(400).json({ error: "ID required" });
+      const updates = {};
+      if (status) updates.status = status;
+      if (match_score !== undefined) updates.match_score = match_score;
+      if (notes !== undefined) updates.notes = notes;
+      await fetch(`${url}/rest/v1/profile_candidates?id=eq.${id}`, { method: "PATCH", headers: { ...H, "Prefer": "return=minimal" }, body: JSON.stringify(updates) });
+      return res.status(200).json({ ok: true });
+    }
+
+    if (action === "remove_assignment") {
+      const { id } = req.body;
+      await fetch(`${url}/rest/v1/profile_candidates?id=eq.${id}`, { method: "DELETE", headers: H });
+      return res.status(200).json({ ok: true });
+    }
+
+    // ═══ UPDATE CANDIDATE ═══
+    if (action === "update_candidate") {
+      const { id, data } = req.body;
+      if (!id || !data) return res.status(400).json({ error: "id and data required" });
+      // Whitelist allowed fields — only columns that exist in candidates table
+      const allowed = ["name","email","phone","seniority","experience","location","english_level","notes","skills","photo_url"];
+      const safe = {};
+      for (const k of allowed) { if (data[k] !== undefined) safe[k] = data[k]; }
+      if (!Object.keys(safe).length) return res.status(400).json({ error: "No valid fields to update" });
+      const r = await fetch(`${url}/rest/v1/candidates?id=eq.${id}`, { method: "PATCH", headers: { ...H, "Prefer": "return=representation" }, body: JSON.stringify(safe) });
+      if (!r.ok) { const err = await r.text(); return res.status(r.status).json({ error: err }); }
+      const d = await r.json();
+      return res.status(200).json(d[0] || d);
+    }
+
+    // ═══ DOCUMENTS (Supabase Storage) ═══
+    if (action === "upload_document") {
+      const { candidate_id, profile_id, doc_type, file_base64, file_name, mime_type } = req.body;
+      if (!candidate_id || !doc_type || !file_base64 || !file_name) {
+        return res.status(400).json({ error: "candidate_id, doc_type, file_base64, file_name required" });
+      }
+      const validTypes = ["cv", "soft_eval", "hard_eval"];
+      if (!validTypes.includes(doc_type)) return res.status(400).json({ error: "Invalid doc_type" });
+
+      // Upload to Supabase Storage
+      const buffer = Buffer.from(file_base64, "base64");
+      const safeName = file_name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `${candidate_id}/${doc_type}_${Date.now()}_${safeName}`;
+      const upRes = await fetch(`${url}/storage/v1/object/documents/${path}`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${key}`, "apikey": key, "Content-Type": mime_type || "application/octet-stream", "x-upsert": "true" },
+        body: buffer,
+      });
+      if (!upRes.ok) {
+        const err = await upRes.text();
+        return res.status(500).json({ error: "Storage upload failed: " + err });
+      }
+
+      // Save metadata to DB
+      const meta = { candidate_id, profile_id: profile_id || null, doc_type, file_path: path, file_name: safeName, file_size: buffer.length };
+      const r = await fetch(`${url}/rest/v1/candidate_documents`, { method: "POST", headers: { ...H, "Prefer": "return=representation" }, body: JSON.stringify(meta) });
+      if (!r.ok) { const err = await r.text(); return res.status(r.status).json({ error: err }); }
+      const d = await r.json();
+      return res.status(200).json(d[0] || d);
+    }
+
+    if (action === "list_documents") {
+      const { candidate_id, profile_id } = req.body || req.query;
+      let q = "?order=created_at.desc";
+      if (candidate_id) q += `&candidate_id=eq.${candidate_id}`;
+      if (profile_id) q += `&profile_id=eq.${profile_id}`;
+      const r = await fetch(`${url}/rest/v1/candidate_documents${q}`, { headers: H });
+      if (!r.ok) return res.status(r.status).json({ error: await r.text() });
+      return res.status(200).json(await r.json());
+    }
+
+    if (action === "delete_document") {
+      const { id, file_path } = req.body;
+      if (!id) return res.status(400).json({ error: "id required" });
+      // Delete from storage
+      if (file_path) {
+        await fetch(`${url}/storage/v1/object/documents/${file_path}`, {
+          method: "DELETE", headers: { "Authorization": `Bearer ${key}`, "apikey": key }
+        });
+      }
+      // Delete metadata
+      await fetch(`${url}/rest/v1/candidate_documents?id=eq.${id}`, { method: "DELETE", headers: H });
+      return res.status(200).json({ ok: true });
+    }
+
+    // ═══ CLIENT DECISIONS ═══
+    if (action === "update_client_decision") {
+      const { assignment_id, decision } = req.body;
+      if (!assignment_id || !decision) return res.status(400).json({ error: "assignment_id and decision required" });
+      const validDecisions = ["pending", "accepted", "rejected"];
+      if (!validDecisions.includes(decision)) return res.status(400).json({ error: "Invalid decision" });
+      await fetch(`${url}/rest/v1/profile_candidates?id=eq.${assignment_id}`, {
+        method: "PATCH", headers: { ...H, "Prefer": "return=minimal" },
+        body: JSON.stringify({ client_decision: decision })
+      });
+      return res.status(200).json({ ok: true });
+    }
+
+    // ═══ REVIEW DATA (full profile + assigned candidates for client review) ═══
+    if (action === "get_review_data") {
+      const { profile_id } = req.body;
+      if (!profile_id) return res.status(400).json({ error: "profile_id required" });
+      const [pR, aR] = await Promise.all([
+        fetch(`${url}/rest/v1/profiles?id=eq.${profile_id}&select=*`, { headers: H }),
+        fetch(`${url}/rest/v1/profile_candidates?profile_id=eq.${profile_id}&select=*,candidates(*)&order=match_score.desc`, { headers: H }),
+      ]);
+      const profile = (await pR.json())[0];
+      const assignments = await aR.json();
+      // Get documents for all assigned candidates
+      const candIds = assignments.map(a => a.candidate_id).filter(Boolean);
+      let docs = [];
+      if (candIds.length) {
+        const dR = await fetch(`${url}/rest/v1/candidate_documents?candidate_id=in.(${candIds.join(",")})&profile_id=eq.${profile_id}`, { headers: H });
+        docs = await dR.json();
+      }
+      return res.status(200).json({ profile, assignments, documents: docs });
+    }
+
+    // ═══ STORAGE URL (signed download URL) ═══
+    if (action === "get_document_url") {
+      const { file_path } = req.body;
+      if (!file_path) return res.status(400).json({ error: "file_path required" });
+      const r = await fetch(`${url}/storage/v1/object/sign/documents/${file_path}`, {
+        method: "POST", headers: { ...H }, body: JSON.stringify({ expiresIn: 3600 })
+      });
+      const d = await r.json();
+      return res.status(200).json({ url: `${url}/storage/v1${d.signedURL}` });
+    }
+
+    return res.status(400).json({ error: "Unknown action" });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+}
