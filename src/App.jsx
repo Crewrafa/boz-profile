@@ -8,21 +8,13 @@ const BASE_URL=import.meta.env.VITE_BASE_URL||window.location.origin;
 
 // ═══ DESIGN SYSTEM TOKENS ═══
 const DS={
-  font:{heading:"'Plus Jakarta Sans',sans-serif",body:"'DM Sans',sans-serif",mono:"'JetBrains Mono','SF Mono','Fira Code',monospace"},
+  font:{heading:"'Plus Jakarta Sans',sans-serif",body:"'DM Sans',sans-serif"},
   text:{h1:"#0F172A",h2:"#1E293B",body:"#334155",muted:"#64748B",faint:"#94A3B8",placeholder:"#CBD5E1"},
   brand:{navy900:"#0D2550",navy800:"#153572",blue700:"#1B6FE8",blue600:"#3D85EC",blue100:"#E2EEFE",blue50:"#F0F6FF",cyan600:"#22D3EE",cyan100:"#E0FAFD"},
   surface:{page:"#F8FAFC",card:"#FFFFFF",sunken:"#F1F5F9",border:"#E2E8F0",borderLight:"#F1F5F9"},
-  radius:{xs:4,sm:6,md:10,lg:14,xl:18,xxl:24,pill:9999},
-  shadow:{sm:"0 1px 3px rgba(0,0,0,0.04),0 1px 2px rgba(0,0,0,0.02)",md:"0 4px 6px -1px rgba(0,0,0,0.05),0 2px 4px -2px rgba(0,0,0,0.03)",lg:"0 10px 15px -3px rgba(0,0,0,0.05),0 4px 6px -4px rgba(0,0,0,0.03)",xl:"0 20px 25px -5px rgba(0,0,0,0.06),0 8px 10px -6px rgba(0,0,0,0.03)",blue:"0 4px 14px rgba(27,111,232,0.2)",glow:"0 0 0 3px rgba(27,111,232,0.08)",card:"0 1px 3px rgba(0,0,0,0.03),0 0 0 1px rgba(0,0,0,0.03)"},
-  ease:{default:"cubic-bezier(0.25,0.46,0.45,0.94)",snap:"cubic-bezier(0.23,1,0.32,1)",smooth:"cubic-bezier(0.4,0,0.2,1)",spring:"cubic-bezier(0.34,1.56,0.64,1)"},
-};
-// ═══ ROLE THEMES ═══
-const THEME={
-  admin:{bg:"linear-gradient(135deg,#0D2550,#1B3A70)",accent:"#22D3EE",accentBg:"rgba(34,211,238,0.12)",accentBorder:"rgba(34,211,238,0.2)",dot:"#22D3EE",label:"Admin"},
-  recruiter:{bg:"linear-gradient(135deg,#7C2D12,#C2410C)",accent:"#FB923C",accentBg:"rgba(251,146,60,0.12)",accentBorder:"rgba(251,146,60,0.2)",dot:"#f97316",label:"Recruiter"},
-  ana:{bg:"linear-gradient(135deg,#2E1065,#5B21B6)",accent:"#C084FC",accentBg:"rgba(192,132,252,0.12)",accentBorder:"rgba(192,132,252,0.2)",dot:"#7C3AED",label:"Talent Discovery"},
-  sales:{bg:"linear-gradient(135deg,#064E3B,#059669)",accent:"#6EE7B7",accentBg:"rgba(110,231,183,0.12)",accentBorder:"rgba(110,231,183,0.2)",dot:"#059669",label:"Sales"},
-  finance:{bg:"linear-gradient(135deg,#0C4A6E,#0369A1)",accent:"#7DD3FC",accentBg:"rgba(125,211,252,0.12)",accentBorder:"rgba(125,211,252,0.2)",dot:"#0EA5E9",label:"Finance"},
+  radius:{xs:4,sm:6,md:8,lg:12,xl:16,xxl:20,pill:9999},
+  shadow:{sm:"0 1px 2px rgba(0,0,0,0.04),0 1px 4px rgba(0,0,0,0.04)",md:"0 2px 4px rgba(0,0,0,0.04),0 4px 8px rgba(0,0,0,0.04),0 8px 16px rgba(0,0,0,0.03)",lg:"0 4px 8px rgba(0,0,0,0.04),0 8px 16px rgba(0,0,0,0.04),0 16px 32px rgba(0,0,0,0.03),0 24px 48px rgba(0,0,0,0.02)",blue:"0 4px 14px rgba(27,111,232,0.25)",glow:"0 0 0 3px rgba(27,111,232,0.1)"},
+  ease:{default:"cubic-bezier(0.25,0.46,0.45,0.94)",snap:"cubic-bezier(0.23,1,0.32,1)",smooth:"cubic-bezier(0.4,0,0.2,1)"},
 };
 
 const useW=()=>{const[w,s]=useState(typeof window!=="undefined"?window.innerWidth:1024);useEffect(()=>{const h=()=>s(window.innerWidth);window.addEventListener("resize",h);return()=>window.removeEventListener("resize",h)},[]);return w};
@@ -75,9 +67,9 @@ Return ONLY valid JSON: {"objective":"3-4 sentence paragraph referencing specifi
   return`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>BOZ - ${e(p.role)}</title><style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Inter',sans-serif;color:#1e293b;-webkit-print-color-adjust:exact;print-color-adjust:exact}@page{margin:10mm}.hdr{background:linear-gradient(135deg,#0D2550,#1B3A70,#1B6FE8);padding:32px 48px 24px;color:#fff}.logo{font-size:24px;font-weight:800;letter-spacing:2px}.logo span{color:#22d3ee}.sub{font-size:10px;color:rgba(255,255,255,.5);letter-spacing:2px;text-transform:uppercase;margin-top:2px}.bb{background:#1B6FE8;padding:12px 48px;color:#fff;font-size:12px}.cnt{padding:0 48px 32px}.st{background:#0D2550;color:#fff;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:8px 16px;margin:24px 0 12px;border-radius:2px}.stb{background:#1B6FE8}table{width:100%;border-collapse:collapse}.ft{text-align:center;padding:16px;font-size:9px;color:#94a3b8;border-top:1px solid #e2e8f0;margin-top:24px}.ft strong{color:#0D2550}@media print{.np{display:none!important}}</style></head><body><div class="hdr"><div class="logo">BOZ<span>.</span></div><div class="sub">IT Staffing · Verified Fit</div></div><div class="bb">${tags}</div><div style="padding:32px 48px 0"><div style="font-size:22px;font-weight:700;color:#0D2550">${e(p.role)} ${e(p.seniority)}</div><div style="font-size:12px;color:#64748b;margin-top:4px">${e(p.category)} · ${e(p.experience)} · ${e(p.location||"")} · Headcount: ${p.headcount}</div></div>${cl?`<div style="padding:16px 48px 0"><table style="font-size:12px;color:#64748b"><tr><td style="padding-right:24px"><strong>Client:</strong> ${e(cl.name)} (${e(cl.company)})</td><td><strong>Start:</strong> ${e(p.startDate||"TBD")}</td></tr></table></div>`:""}<div class="cnt"><div class="st">ROLE OBJECTIVE</div><p style="font-size:12px;line-height:1.7;color:#334155">${e(ai.objective||"")}</p><div class="st">EXPERIENCE PROFILE</div><table style="margin-bottom:8px"><tr>${eg}</tr></table><div class="st">MUST HAVE VS NICE TO HAVE</div><table><tr><td style="width:50%;vertical-align:top;padding-right:12px"><div style="font-size:11px;font-weight:700;color:#c0392b;margin-bottom:6px">● MUST HAVE — Non-negotiable</div><table>${mh||'<tr><td style="color:#94a3b8;font-size:12px;padding:4px 12px">None</td></tr>'}</table></td><td style="width:50%;vertical-align:top;padding-left:12px"><div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:6px">■ NICE TO HAVE — Desirable</div><table>${nh||'<tr><td style="color:#94a3b8;font-size:12px;padding:4px 12px">None</td></tr>'}</table></td></tr></table><div class="st">TECHNICAL STACK</div><table>${tr.join("")}</table><div class="st">KEY RESPONSIBILITIES</div><ul style="padding-left:20px;margin-top:8px">${resp}</ul><div class="st stb">SOFT SKILLS</div><ul style="padding-left:20px;margin-top:8px">${ss}</ul>${p.additionalNotes?`<div class="st stb">NOTES</div><p style="font-size:12px;line-height:1.6;color:#334155;margin-top:8px">${e(p.additionalNotes)}</p>`:""}</div><div class="ft"><strong>BOZ IT Staffing</strong> · Confidential · ${new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})}</div><div class="np" style="text-align:center;padding:20px;background:#f8fafc"><button onclick="window.print()" style="background:linear-gradient(135deg,#0D2550,#1B6FE8);color:#fff;border:none;padding:14px 36px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer">📄 Download as PDF</button></div></body></html>`}
 
 // ═══════════ UI ═══════════
-function Pill({label,selected,onClick,color,small}){const[h,setH]=useState(false);return(<button onClick={onClick} type="button" onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)} style={{display:"inline-flex",alignItems:"center",gap:6,padding:small?"4px 11px":"8px 16px",fontSize:small?11:13,fontWeight:selected?600:450,fontFamily:DS.font.body,borderRadius:small?DS.radius.sm:DS.radius.md,border:selected?"1.5px solid transparent":`1px solid ${h?"#d0d5dd":"#e8ebf0"}`,cursor:"pointer",transition:`all .2s ${DS.ease.smooth}`,background:selected?(color||DS.brand.navy900):h?"#f9fafb":"#fff",color:selected?"#fff":h?DS.text.h2:DS.text.body,transform:selected?"scale(1)":"scale(1)",boxShadow:selected?`0 1px 4px ${(color||DS.brand.navy900)}25`:h?"0 1px 2px rgba(0,0,0,0.04)":"none",letterSpacing:"-0.01em"}}>{label}</button>)}
-function Section({title,sub,children,delay=0}){return(<div style={{marginBottom:36,animation:`fadeUp .35s ${delay}s both`}}><div style={{fontSize:13.5,fontWeight:700,color:DS.text.h2,marginBottom:sub?2:14,fontFamily:DS.font.heading,letterSpacing:"-0.02em"}}>{title}</div>{sub&&<div style={{fontSize:11.5,color:DS.text.faint,marginBottom:14,fontFamily:DS.font.body,letterSpacing:"-0.005em"}}>{sub}</div>}{children}</div>)}
-function InfoBox({text}){const spIdx=(text||"").indexOf(" ");const emoji=spIdx>0?text.substring(0,spIdx):"";const rest=spIdx>0?text.substring(spIdx+1):text;return(<div style={{background:"#fff",borderRadius:DS.radius.md,padding:"14px 18px",marginBottom:24,borderLeft:`3px solid ${DS.brand.blue700}`,boxShadow:DS.shadow.card,display:"flex",gap:12,alignItems:"flex-start"}}>{emoji&&<span style={{fontSize:15,lineHeight:1.4,flexShrink:0,marginTop:1}}>{emoji}</span>}<div style={{fontSize:12.5,color:DS.text.body,lineHeight:1.7,fontFamily:DS.font.body}}>{rest}</div></div>)}
+function Pill({label,selected,onClick,color,small}){const[h,setH]=useState(false);return(<button onClick={onClick} type="button" onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)} style={{display:"inline-flex",alignItems:"center",gap:6,padding:small?"5px 12px":"9px 18px",fontSize:small?11:13,fontWeight:selected?600:500,fontFamily:DS.font.body,borderRadius:DS.radius.pill,border:selected?"1.5px solid transparent":`1.5px solid ${h?DS.surface.border:"#edf0f4"}`,cursor:"pointer",transition:`all .25s ${DS.ease.snap}`,background:selected?(color||DS.brand.navy900):h?"#f8fafc":"#fff",color:selected?"#fff":DS.text.body,transform:selected?"scale(1.02)":"scale(1)",boxShadow:selected?`0 2px 8px ${(color||DS.brand.navy900)}30`:h?DS.shadow.sm:"none",letterSpacing:"-0.005em"}}>{label}</button>)}
+function Section({title,sub,children,delay=0}){return(<div style={{marginBottom:32,animation:`fadeUp .4s ${delay}s both`}}><div style={{fontSize:13,fontWeight:600,color:DS.text.h2,marginBottom:sub?3:12,fontFamily:DS.font.heading,letterSpacing:"-0.01em"}}>{title}</div>{sub&&<div style={{fontSize:11.5,color:DS.text.faint,marginBottom:12,fontFamily:DS.font.body}}>{sub}</div>}{children}</div>)}
+function InfoBox({text}){const spIdx=(text||"").indexOf(" ");const emoji=spIdx>0?text.substring(0,spIdx):"💡";const rest=spIdx>0?text.substring(spIdx+1):text;return(<div style={{background:`linear-gradient(135deg,${DS.brand.blue50},#fff)`,borderRadius:DS.radius.lg,padding:"18px 22px",marginBottom:28,border:`1px solid rgba(27,111,232,0.08)`,display:"flex",gap:14,alignItems:"flex-start",boxShadow:"0 1px 4px rgba(27,111,232,0.03)"}}><div style={{width:38,height:38,borderRadius:DS.radius.md,background:`linear-gradient(135deg,${DS.brand.navy900},${DS.brand.blue700})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,flexShrink:0,boxShadow:DS.shadow.blue,color:"#fff"}}>{emoji}</div><div style={{fontSize:13,color:DS.text.body,lineHeight:1.7,fontFamily:DS.font.body,paddingTop:3}}>{rest}</div></div>)}
 function Spinner({text}){return(<div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:14,padding:40}}><div style={{width:40,height:40,border:`3px solid ${DS.surface.border}`,borderTop:`3px solid ${DS.brand.blue700}`,borderRadius:"50%",animation:"spin 1s linear infinite"}}/><div style={{fontSize:13,color:DS.text.muted,fontFamily:DS.font.body}}>{text}</div></div>)}
 // Animated background effect (reused from Login)
 function HeaderBG(){return(<div style={{position:"absolute",inset:0,overflow:"hidden",pointerEvents:"none"}}>
@@ -174,7 +166,7 @@ function Footer(){
     <div style={{height:1,background:"linear-gradient(to right,transparent,rgba(255,255,255,0.06),transparent)",marginBottom:16}}/>
     <div style={{display:"flex",flexDirection:mob?"column":"row",justifyContent:"space-between",alignItems:mob?"flex-start":"center",gap:8}}>
       <div style={{display:"flex",alignItems:"center",gap:10}}>
-        <div style={{fontSize:10,color:"rgba(255,255,255,0.22)",fontFamily:DS.font.body}}>© 2025 BOZ, Empowering IT Solutions. All Rights Reserved.</div>
+        <div style={{fontSize:10,color:"rgba(255,255,255,0.22)",fontFamily:DS.font.body}}>© 2024 BOZ, Empowering IT Solutions. All Rights Reserved.</div>
         <span style={{fontSize:9,color:"rgba(255,255,255,0.18)",background:"rgba(255,255,255,0.04)",padding:"2px 8px",borderRadius:DS.radius.xs,fontFamily:"monospace",letterSpacing:.5,border:"1px solid rgba(255,255,255,0.04)"}}>v{APP_VERSION} beta</span>
       </div>
       <div style={{display:"flex",gap:16,flexShrink:0}}><button type="button" onClick={()=>setModal("privacy")} style={{fontSize:11,color:"rgba(255,255,255,0.3)",background:"none",border:"none",cursor:"pointer",fontFamily:DS.font.body,textDecoration:"underline",textUnderlineOffset:3,transition:`color .2s ${DS.ease.default}`}} onMouseEnter={e=>{e.target.style.color="rgba(255,255,255,0.6)"}} onMouseLeave={e=>{e.target.style.color="rgba(255,255,255,0.3)"}}>Privacy Policy</button><button type="button" onClick={()=>setModal("terms")} style={{fontSize:11,color:"rgba(255,255,255,0.3)",background:"none",border:"none",cursor:"pointer",fontFamily:DS.font.body,textDecoration:"underline",textUnderlineOffset:3,transition:`color .2s ${DS.ease.default}`}} onMouseEnter={e=>{e.target.style.color="rgba(255,255,255,0.6)"}} onMouseLeave={e=>{e.target.style.color="rgba(255,255,255,0.3)"}}>Terms &amp; Conditions</button></div>
@@ -216,20 +208,20 @@ function Login(){const[email,setEmail]=useState("");const[sent,setSent]=useState
           <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")go()}} placeholder="your@company.com" style={{width:"100%",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:DS.radius.md,padding:"13px 16px",fontSize:14,fontFamily:DS.font.body,outline:"none",color:"#fff",marginBottom:14,transition:`border-color .25s ${DS.ease.default},box-shadow .25s ${DS.ease.default}`}} onFocus={e=>{e.target.style.borderColor="rgba(27,111,232,0.5)";e.target.style.boxShadow="0 0 0 3px rgba(27,111,232,0.1)"}} onBlur={e=>{e.target.style.borderColor="rgba(255,255,255,0.1)";e.target.style.boxShadow="none"}}/>
           {err&&<div style={{fontSize:12,color:"#f87171",marginBottom:10,padding:"8px 12px",background:"rgba(248,113,113,0.1)",borderRadius:DS.radius.md,fontFamily:DS.font.body}}>{err}</div>}
           <button onClick={go} disabled={ld||!email.includes("@")} type="button" style={{width:"100%",background:email.includes("@")?`linear-gradient(135deg,${DS.brand.navy800},${DS.brand.blue700})`:"rgba(255,255,255,0.05)",color:email.includes("@")?"#fff":"rgba(255,255,255,0.3)",border:"none",borderRadius:DS.radius.md,padding:14,fontSize:14,fontWeight:600,cursor:email.includes("@")?"pointer":"default",fontFamily:DS.font.heading,boxShadow:email.includes("@")?DS.shadow.blue:"none",transition:`all .25s ${DS.ease.snap}`,letterSpacing:"-0.005em"}}>{ld?"Sending...":"Send Magic Link →"}</button>
-          {DEV_MODE&&<div style={{marginTop:20,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.06)"}}>
-            <div style={{fontSize:9,color:"rgba(255,255,255,0.2)",marginBottom:10,textAlign:"center",textTransform:"uppercase",letterSpacing:2,fontFamily:DS.font.body}}>Development</div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:4}}>
-              <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev");window.location.reload()}} style={{background:"rgba(34,211,238,0.08)",border:"1px solid rgba(34,211,238,0.15)",borderRadius:6,padding:"8px 4px",fontSize:10,color:"rgba(34,211,238,0.7)",cursor:"pointer",fontFamily:DS.font.heading,fontWeight:600,transition:"all .15s"}}>Admin</button>
-              <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-recruiter");window.location.reload()}} style={{background:"rgba(249,115,22,0.08)",border:"1px solid rgba(249,115,22,0.15)",borderRadius:6,padding:"8px 4px",fontSize:10,color:"rgba(251,146,60,0.7)",cursor:"pointer",fontFamily:DS.font.heading,fontWeight:600,transition:"all .15s"}}>Recruiter</button>
-              <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-ana");window.location.reload()}} style={{background:"rgba(124,58,237,0.08)",border:"1px solid rgba(124,58,237,0.15)",borderRadius:6,padding:"8px 4px",fontSize:10,color:"rgba(167,139,250,0.7)",cursor:"pointer",fontFamily:DS.font.heading,fontWeight:600,transition:"all .15s"}}>Ana</button>
-              <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-sales");window.location.reload()}} style={{background:"rgba(5,150,105,0.08)",border:"1px solid rgba(5,150,105,0.15)",borderRadius:6,padding:"8px 4px",fontSize:10,color:"rgba(110,231,183,0.7)",cursor:"pointer",fontFamily:DS.font.heading,fontWeight:600,transition:"all .15s"}}>Sales</button>
-              <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-finance");window.location.reload()}} style={{background:"rgba(14,165,233,0.08)",border:"1px solid rgba(14,165,233,0.15)",borderRadius:6,padding:"8px 4px",fontSize:10,color:"rgba(125,211,252,0.7)",cursor:"pointer",fontFamily:DS.font.heading,fontWeight:600,transition:"all .15s"}}>Finance</button>
-              <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-client");window.location.reload()}} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"8px 4px",fontSize:10,color:"rgba(255,255,255,0.4)",cursor:"pointer",fontFamily:DS.font.heading,fontWeight:600,transition:"all .15s"}}>Client</button>
+          {DEV_MODE&&<div style={{marginTop:16,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
+            <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginBottom:8,textAlign:"center",textTransform:"uppercase",letterSpacing:2}}>Dev Mode</div>
+            <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+              <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev");window.location.reload()}} style={{flex:"1 1 28%",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,padding:"8px",fontSize:10,color:"rgba(255,255,255,0.5)",cursor:"pointer",fontFamily:"inherit"}}>⚡ Admin</button>
+              <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-sales");window.location.reload()}} style={{flex:"1 1 28%",background:"rgba(5,150,105,0.12)",border:"1px solid rgba(5,150,105,0.25)",borderRadius:8,padding:"8px",fontSize:10,color:"rgba(52,211,153,0.8)",cursor:"pointer",fontFamily:"inherit"}}>💼 Sales</button>
+              <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-recruiter");window.location.reload()}} style={{flex:"1 1 28%",background:"rgba(249,115,22,0.12)",border:"1px solid rgba(249,115,22,0.25)",borderRadius:8,padding:"8px",fontSize:10,color:"rgba(251,146,60,0.8)",cursor:"pointer",fontFamily:"inherit"}}>🔍 Recruiter</button>
+              <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-ana");window.location.reload()}} style={{flex:"1 1 28%",background:"rgba(124,58,237,0.15)",border:"1px solid rgba(124,58,237,0.3)",borderRadius:8,padding:"8px",fontSize:10,color:"rgba(167,139,250,0.8)",cursor:"pointer",fontFamily:"inherit"}}>🧠 Ana</button>
+              <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-finance");window.location.reload()}} style={{flex:"1 1 28%",background:"rgba(3,105,161,0.12)",border:"1px solid rgba(3,105,161,0.25)",borderRadius:8,padding:"8px",fontSize:10,color:"rgba(56,189,248,0.8)",cursor:"pointer",fontFamily:"inherit"}}>💰 Finance</button>
+              <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-client");window.location.reload()}} style={{flex:"1 1 28%",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,padding:"8px",fontSize:10,color:"rgba(255,255,255,0.5)",cursor:"pointer",fontFamily:"inherit"}}>👤 Client</button>
             </div>
           </div>}
         </>:<div style={{textAlign:"center"}}><div style={{width:56,height:56,borderRadius:"50%",background:"rgba(79,106,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",fontSize:24}}>✉️</div><div style={{fontSize:17,fontWeight:600,color:"#fff"}}>Check your inbox</div><div style={{fontSize:13,color:"rgba(255,255,255,0.45)",marginTop:6}}>We sent a secure login link to<br/><strong style={{color:"#4F6AFF"}}>{email}</strong></div><button onClick={()=>setSent(false)} type="button" style={{marginTop:20,fontSize:13,color:"#4F6AFF",background:"none",border:"1px solid rgba(79,106,255,0.3)",borderRadius:8,padding:"8px 20px",cursor:"pointer",fontFamily:"inherit"}}>Use different email</button></div>}
       </div>
-      <div style={{textAlign:"center",marginTop:24,fontSize:11,color:"rgba(255,255,255,0.15)"}}>© 2025 BOZ, Empowering IT Solutions.</div>
+      <div style={{textAlign:"center",marginTop:24,fontSize:11,color:"rgba(255,255,255,0.2)"}}>© 2024 BOZ, Empowering IT Solutions. All Rights Reserved.</div>
     </div>
     <style>{`@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}::placeholder{color:rgba(255,255,255,0.25)!important}`}</style>
   </div>)}
@@ -269,6 +261,8 @@ function Admin({user}){
   const[users,setUsers]=useState([]);const[showAddUser,setShowAddUser]=useState(false);
   const[newUser,setNewUser]=useState({email:"",role:"recruiter",name:""});
   const isMob=useW()<640;
+  // Phase 3: Admin alerts
+  const[adminAlerts,setAdminAlerts]=useState([]);const[alertsLoading,setAlertsLoading]=useState(false);
 
   // Load data
   const load=useCallback(async()=>{
@@ -817,45 +811,48 @@ function Admin({user}){
   </div>;
 
   const greeting=new Date().getHours()<12?"Good morning":new Date().getHours()<18?"Good afternoon":"Good evening";
-  const th=isAdmin?THEME.admin:THEME.recruiter;
 
-  return(<div style={{minHeight:"100vh",background:DS.surface.page,fontFamily:DS.font.body,display:"flex"}}>
+  return(<div style={{minHeight:"100vh",background:`linear-gradient(180deg,${DS.surface.sunken} 0%,#EEF2F7 100%)`,fontFamily:DS.font.body,display:"flex"}}>
     {/* Sidebar */}
-    <div style={{width:sideOpen?240:64,minHeight:"100vh",background:DS.brand.navy900,transition:`width .25s ${DS.ease.smooth}`,display:"flex",flexDirection:"column",flexShrink:0,position:isMob?"fixed":"sticky",top:0,left:0,zIndex:isMob?50:20,boxShadow:isMob?"0 0 40px rgba(0,0,0,0.4)":"none",overflow:"hidden"}}>
+    <div style={{width:sideOpen?230:68,minHeight:"100vh",background:`linear-gradient(180deg,${DS.brand.navy900} 0%,#132B5E 50%,#1B3A70 100%)`,transition:`width .3s cubic-bezier(0.4,0,0.2,1)`,display:"flex",flexDirection:"column",flexShrink:0,position:isMob?"fixed":"sticky",top:0,left:0,zIndex:isMob?50:20,boxShadow:`${isMob?"0 0 40px rgba(0,0,0,0.4)":"1px 0 0 rgba(255,255,255,0.04)"}`,overflow:"hidden"}}>
       {/* Logo */}
-      <div style={{padding:sideOpen?"20px 20px":"20px 0",display:"flex",alignItems:"center",justifyContent:sideOpen?"flex-start":"center",gap:12,minHeight:64}}>
-        <div style={{width:32,height:32,borderRadius:8,background:th.accent,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-          <span style={{fontSize:13,fontWeight:800,color:DS.brand.navy900,fontFamily:DS.font.heading}}>B</span>
+      <div style={{padding:sideOpen?"22px 20px":"22px 0",display:"flex",alignItems:"center",justifyContent:sideOpen?"flex-start":"center",gap:10,borderBottom:"1px solid rgba(255,255,255,0.05)",minHeight:68}}>
+        <div style={{width:36,height:36,borderRadius:DS.radius.md,background:`linear-gradient(135deg,${DS.brand.blue700},${DS.brand.cyan600})`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:"0 2px 8px rgba(27,111,232,0.3)"}}>
+          <span style={{fontSize:14,fontWeight:800,color:"#fff",fontFamily:DS.font.heading}}>B</span>
         </div>
-        {sideOpen&&<div><div style={{fontSize:15,fontWeight:800,color:"#fff",letterSpacing:0.5,fontFamily:DS.font.heading}}>BOZ<span style={{color:th.accent}}>.</span></div><div style={{fontSize:9,color:"rgba(255,255,255,0.35)",letterSpacing:2,textTransform:"uppercase",fontFamily:DS.font.body,marginTop:1}}>{th.label}</div></div>}
+        {sideOpen&&<div><div style={{fontSize:16,fontWeight:800,color:"#fff",letterSpacing:1,fontFamily:DS.font.heading}}>BOZ<span style={{color:DS.brand.cyan600}}>.</span></div><div style={{fontSize:8,color:"rgba(255,255,255,0.3)",letterSpacing:2.5,textTransform:"uppercase",fontFamily:DS.font.body}}>{isAdmin?"Admin":"Recruiter"}</div></div>}
       </div>
-      {/* Nav */}
-      <div style={{flex:1,padding:"12px 8px",display:"flex",flexDirection:"column",gap:1}}>
-        {sideOpen&&<div style={{fontSize:9,fontWeight:600,color:"rgba(255,255,255,0.2)",letterSpacing:1.5,textTransform:"uppercase",padding:"8px 12px 6px",fontFamily:DS.font.body}}>Navigation</div>}
+      {/* Nav items */}
+      <div style={{flex:1,padding:"16px 10px",display:"flex",flexDirection:"column",gap:2}}>
         {[
-          ...(isAdmin?[{id:"users",letter:"U",label:"Users"}]:[]),
-          {id:"review",letter:"R",label:"Review"},
-          {id:"kanban",letter:"K",label:"Board"},
-          {id:"pipeline",letter:"P",label:"Pipeline"},
-          {id:"process",letter:"S",label:"Process"},
-          {id:"list",letter:"D",label:"Dashboard"},
-          {id:"talent_pool",letter:"T",label:"Talent Pool"},
+          ...(isAdmin?[{id:"users",icon:"👥",label:"Users"}]:[]),
+          {id:"review",icon:"✅",label:"Review"},
+          {id:"kanban",icon:"📋",label:"Board"},
+          {id:"pipeline",icon:"🔄",label:"Pipeline"},
+          {id:"process",icon:"📍",label:"Process"},
+          {id:"list",icon:"📊",label:"Dashboard"},
+          {id:"talent_pool",icon:"👤",label:"Talent Pool"},
+          ...(isAdmin?[
+            {id:"alerts",icon:"🔔",label:"Alerts"},
+            {id:"ana_view",icon:"🧠",label:"Ana View"},
+            {id:"sales_view",icon:"💼",label:"Sales View"},
+            {id:"client_view",icon:"👁️",label:"Client View"},
+          ]:[]),
         ].map(nav=>{
           const active=view===nav.id;
-          return(<button key={nav.id} type="button" onClick={()=>setView(nav.id)} style={{display:"flex",alignItems:"center",gap:sideOpen?10:0,padding:sideOpen?"9px 12px":"9px 0",borderRadius:8,border:"none",cursor:"pointer",background:active?th.accentBg:"transparent",color:active?th.accent:"rgba(255,255,255,0.45)",transition:`all .15s ${DS.ease.smooth}`,fontFamily:DS.font.heading,fontSize:13,fontWeight:active?600:500,justifyContent:sideOpen?"flex-start":"center",width:"100%",textAlign:"left",letterSpacing:"-0.01em",position:"relative"}} onMouseEnter={e=>{if(!active){e.currentTarget.style.background="rgba(255,255,255,0.04)";e.currentTarget.style.color="rgba(255,255,255,0.75)"}}} onMouseLeave={e=>{if(!active){e.currentTarget.style.background="transparent";e.currentTarget.style.color="rgba(255,255,255,0.45)"}}}>
-            <span style={{width:sideOpen?28:48,height:24,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:11,fontWeight:700,fontFamily:DS.font.heading,borderRadius:5,background:active?`${th.accent}20`:"transparent",color:active?th.accent:"rgba(255,255,255,0.3)",transition:"all .15s"}}>{nav.letter}</span>
+          return(<button key={nav.id} type="button" onClick={()=>setView(nav.id)} style={{display:"flex",alignItems:"center",gap:sideOpen?12:0,padding:sideOpen?"11px 14px":"11px 0",borderRadius:DS.radius.md,border:"none",cursor:"pointer",background:active?"rgba(27,111,232,0.15)":"transparent",color:active?"#fff":"rgba(255,255,255,0.5)",transition:`all .2s cubic-bezier(0.4,0,0.2,1)`,fontFamily:DS.font.heading,fontSize:sideOpen?13:18,fontWeight:active?600:500,justifyContent:sideOpen?"flex-start":"center",width:"100%",textAlign:"left",letterSpacing:"-0.005em",borderLeft:active?`3px solid ${DS.brand.cyan600}`:"3px solid transparent",position:"relative"}} onMouseEnter={e=>{if(!active){e.currentTarget.style.background="rgba(255,255,255,0.04)";e.currentTarget.style.color="rgba(255,255,255,0.8)"}}} onMouseLeave={e=>{if(!active){e.currentTarget.style.background="transparent";e.currentTarget.style.color="rgba(255,255,255,0.5)"}}}>
+            <span style={{fontSize:sideOpen?16:18,width:sideOpen?24:48,textAlign:"center",flexShrink:0}}>{nav.icon}</span>
             {sideOpen&&<span>{nav.label}</span>}
-            {active&&sideOpen&&<div style={{position:"absolute",left:0,top:"50%",transform:"translateY(-50%)",width:3,height:16,borderRadius:2,background:th.accent}}/>}
           </button>);
         })}
       </div>
-      {/* User */}
-      <div style={{padding:sideOpen?"14px 14px":"14px 8px",borderTop:"1px solid rgba(255,255,255,0.06)"}}>
-        {sideOpen&&<div style={{fontSize:10,color:"rgba(255,255,255,0.25)",fontFamily:DS.font.body,marginBottom:2}}>{greeting}</div>}
-        {sideOpen&&<div style={{fontSize:12,fontWeight:600,color:"rgba(255,255,255,0.65)",fontFamily:DS.font.heading,marginBottom:10,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{user.email?.split("@")[0]}</div>}
+      {/* Toggle + User */}
+      <div style={{padding:sideOpen?"14px 14px":"14px 10px",borderTop:"1px solid rgba(255,255,255,0.05)"}}>
+        {sideOpen&&<div style={{fontSize:10,color:"rgba(255,255,255,0.3)",fontFamily:DS.font.body,marginBottom:2}}>{greeting}</div>}
+        {sideOpen&&<div style={{fontSize:12,fontWeight:600,color:"rgba(255,255,255,0.7)",fontFamily:DS.font.heading,marginBottom:10,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{user.email?.split("@")[0]}</div>}
         <div style={{display:"flex",gap:6}}>
-          <button type="button" onClick={()=>setSideOpen(p=>!p)} style={{flex:sideOpen?0:1,width:sideOpen?32:"100%",height:32,borderRadius:6,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.06)",color:"rgba(255,255,255,0.35)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,transition:`all .2s ${DS.ease.smooth}`,flexShrink:0}} onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,0.08)";e.currentTarget.style.color="rgba(255,255,255,0.7)"}} onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.04)";e.currentTarget.style.color="rgba(255,255,255,0.35)"}}>{sideOpen?"◂":"▸"}</button>
-          {sideOpen&&<button onClick={signOut} type="button" style={{flex:1,fontSize:11,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:6,padding:"7px",color:"rgba(255,255,255,0.35)",cursor:"pointer",fontFamily:DS.font.body,transition:"all .15s"}} onMouseEnter={e=>{e.currentTarget.style.background="rgba(239,68,68,0.1)";e.currentTarget.style.color="#fca5a5";e.currentTarget.style.borderColor="rgba(239,68,68,0.2)"}} onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.04)";e.currentTarget.style.color="rgba(255,255,255,0.35)";e.currentTarget.style.borderColor="rgba(255,255,255,0.06)"}}>Sign Out</button>}
+          <button type="button" onClick={()=>setSideOpen(p=>!p)} style={{flex:sideOpen?0:1,width:sideOpen?34:"100%",height:34,borderRadius:DS.radius.sm,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.06)",color:"rgba(255,255,255,0.4)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,transition:`all .25s cubic-bezier(0.4,0,0.2,1)`,flexShrink:0}} onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,0.1)";e.currentTarget.style.color="#fff"}} onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.05)";e.currentTarget.style.color="rgba(255,255,255,0.4)"}}>{sideOpen?"◀":"▶"}</button>
+          {sideOpen&&<button onClick={signOut} type="button" style={{flex:1,fontSize:11,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:DS.radius.sm,padding:"8px",color:"rgba(255,255,255,0.4)",cursor:"pointer",fontFamily:DS.font.body,transition:`all .2s`}} onMouseEnter={e=>{e.currentTarget.style.background="rgba(239,68,68,0.12)";e.currentTarget.style.color="#fca5a5"}} onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.05)";e.currentTarget.style.color="rgba(255,255,255,0.4)"}}>Sign Out</button>}
         </div>
       </div>
     </div>
@@ -863,13 +860,15 @@ function Admin({user}){
 
     {/* Main content */}
     <div style={{flex:1,display:"flex",flexDirection:"column",minWidth:0}}>
-    <div style={{padding:isMob?"16px":"28px 32px",flex:1,width:"100%",maxWidth:1400,margin:"0 auto"}}>
+    <div style={{padding:isMob?"16px":"24px",flex:1,width:"100%",maxWidth:1400,margin:"0 auto"}}>
       {/* Status metrics */}
-      <div style={{display:"grid",gridTemplateColumns:isMob?"repeat(2,1fr)":"repeat(5,1fr)",gap:10,marginBottom:28}}>
-        {Object.entries(STATUS_LABELS).map(([k,v],idx)=>(<div key={k} style={{background:"#fff",borderRadius:DS.radius.md,padding:"18px 20px",border:`1px solid ${DS.surface.border}`,cursor:"pointer",transition:`all .15s ${DS.ease.smooth}`,boxShadow:DS.shadow.card,position:"relative",overflow:"hidden",animation:`fadeUp .3s ${idx*0.04}s both`}} onClick={()=>{if(view!=="kanban")setView("kanban")}} onMouseEnter={e=>{e.currentTarget.style.borderColor=STATUS_COLORS[k];e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=DS.shadow.md}} onMouseLeave={e=>{e.currentTarget.style.borderColor=DS.surface.border;e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow=DS.shadow.card}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-            <div><div style={{fontSize:11,color:DS.text.faint,fontWeight:500,fontFamily:DS.font.body,marginBottom:6,letterSpacing:"-0.01em"}}>{v}</div><div style={{fontSize:28,fontWeight:800,color:DS.text.h1,fontFamily:DS.font.heading,letterSpacing:"-0.03em",lineHeight:1}}>{cn[k]||0}</div></div>
-            <div style={{width:8,height:8,borderRadius:"50%",background:STATUS_COLORS[k],opacity:0.7}}/>
+      <div style={{display:"grid",gridTemplateColumns:isMob?"repeat(2,1fr)":"repeat(5,1fr)",gap:12,marginBottom:24}}>
+        {Object.entries(STATUS_LABELS).map(([k,v],idx)=>(<div key={k} style={{background:"#fff",borderRadius:DS.radius.lg,padding:"20px 22px",border:`1px solid ${DS.surface.border}`,cursor:"pointer",transition:`all .25s ${DS.ease.snap}`,boxShadow:DS.shadow.sm,position:"relative",overflow:"hidden",animation:`fadeUp .4s ${idx*0.06}s both`}} onClick={()=>{if(view!=="kanban")setView("kanban")}} onMouseEnter={e=>{e.currentTarget.style.boxShadow=DS.shadow.md;e.currentTarget.style.transform="translateY(-3px)"}} onMouseLeave={e=>{e.currentTarget.style.boxShadow=DS.shadow.sm;e.currentTarget.style.transform="none"}}>
+          <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:STATUS_COLORS[k]}}/>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
+            <div><div style={{fontSize:32,fontWeight:800,color:DS.text.h1,fontFamily:DS.font.heading,letterSpacing:"-0.03em",lineHeight:1}}>{cn[k]||0}</div><div style={{fontSize:11.5,color:DS.text.muted,fontWeight:500,fontFamily:DS.font.body,marginTop:6}}>{v}</div></div>
+            <div style={{width:32,height:32,borderRadius:DS.radius.md,background:`${STATUS_COLORS[k]}10`,display:"flex",alignItems:"center",justifyContent:"center"}}><div style={{width:8,height:8,borderRadius:"50%",background:STATUS_COLORS[k]}}/>
+            </div>
           </div>
         </div>))}
       </div>
@@ -1255,6 +1254,119 @@ function Admin({user}){
       </div>)}
     </div>
     {renderCandDetailModal()}
+
+    {/* ═══ PHASE 3: ADMIN OMNISCIENT VIEWS ═══ */}
+
+    {/* ALERTS VIEW */}
+    {view==="alerts"&&isAdmin&&(<div style={{position:"fixed",inset:0,zIndex:55,background:"rgba(15,23,42,0.5)",backdropFilter:"blur(3px)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={()=>setView("kanban")}>
+      <div style={{background:"#fff",borderRadius:DS.radius.xxl,padding:28,maxWidth:700,width:"100%",maxHeight:"85vh",overflowY:"auto",animation:"fadeUp .25s both",boxShadow:DS.shadow.lg}} onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+          <div><div style={{fontSize:18,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading}}>🔔 Alerts & Insights</div><div style={{fontSize:12,color:DS.text.muted,fontFamily:DS.font.body,marginTop:2}}>AI-powered profile analysis across all requests</div></div>
+          <button type="button" onClick={()=>setView("kanban")} style={{background:DS.surface.sunken,border:"none",width:32,height:32,borderRadius:DS.radius.md,fontSize:14,cursor:"pointer",color:DS.text.faint}}>✕</button>
+        </div>
+        {!alertsLoading&&!adminAlerts.length&&<button type="button" onClick={async()=>{
+          setAlertsLoading(true);setAdminAlerts([]);
+          const alerts=[];
+          for(const p of ps.slice(0,20)){
+            const pd=p.profile_data||{};
+            // Rule-based alerts (fast, no API needed)
+            if(p.seniority==="Senior"&&pd.experience&&pd.experience.includes("1"))alerts.push({type:"warning",title:`${p.role}: Seniority mismatch`,detail:`Profile says Senior but experience is "${pd.experience}". Verify with client.`,profileId:p.id});
+            if(p.seniority==="Lead"&&pd.experience&&(pd.experience.includes("1")||pd.experience.includes("2")))alerts.push({type:"warning",title:`${p.role}: Lead with low experience`,detail:`Lead role but only "${pd.experience}" experience.`,profileId:p.id});
+            if(!pd.mustHave?.length)alerts.push({type:"info",title:`${p.role}: No must-haves`,detail:`Profile has no must-have requirements defined. This may cause poor candidate matching.`,profileId:p.id});
+            if(!pd.techStack?.languages?.length&&!pd.techStack?.profTools?.length)alerts.push({type:"error",title:`${p.role}: No tech stack`,detail:`No languages or tools specified. Profile is essentially empty technically.`,profileId:p.id});
+            const roleT=ROLE_TYPE[p.role];if(["backend","fullstack","dba","data"].includes(roleT)&&!pd.techStack?.databases?.length)alerts.push({type:"warning",title:`${p.role}: No databases`,detail:`${roleT} role without any databases specified.`,profileId:p.id});
+            if(p.status==="new"&&(Date.now()-new Date(p.created_at).getTime())>7*86400000)alerts.push({type:"warning",title:`${p.role}: Aging request`,detail:`Profile has been in "New" status for ${Math.round((Date.now()-new Date(p.created_at).getTime())/86400000)} days without review.`,profileId:p.id});
+          }
+          if(!alerts.length)alerts.push({type:"info",title:"All clear",detail:"No alerts found across current profiles."});
+          setAdminAlerts(alerts);setAlertsLoading(false);
+        }} style={{width:"100%",background:`linear-gradient(135deg,${DS.brand.navy900},${DS.brand.blue700})`,color:"#fff",border:"none",borderRadius:DS.radius.md,padding:14,fontSize:14,fontWeight:600,cursor:"pointer",fontFamily:DS.font.heading,boxShadow:DS.shadow.blue}}>🔍 Scan All Profiles for Issues</button>}
+        {alertsLoading&&<Spinner text="Scanning profiles..."/>}
+        {adminAlerts.length>0&&<div style={{display:"flex",flexDirection:"column",gap:8}}>
+          {adminAlerts.map((a,i)=>(
+            <div key={i} style={{display:"flex",gap:12,padding:"12px 16px",borderRadius:DS.radius.lg,border:`1px solid ${a.type==="error"?"#fecaca":a.type==="warning"?"#fed7aa":"#e0e7ff"}`,background:a.type==="error"?"#fef2f2":a.type==="warning"?"#fff7ed":"#f0f6ff",animation:`fadeUp .3s ${i*0.05}s both`}}>
+              <span style={{fontSize:16,flexShrink:0,marginTop:1}}>{a.type==="error"?"🔴":a.type==="warning"?"🟡":"🔵"}</span>
+              <div style={{flex:1}}><div style={{fontSize:13,fontWeight:600,color:DS.text.h1,fontFamily:DS.font.heading}}>{a.title}</div><div style={{fontSize:12,color:DS.text.muted,fontFamily:DS.font.body,marginTop:2}}>{a.detail}</div></div>
+              {a.profileId&&<button type="button" onClick={()=>{const p=ps.find(x=>x.id===a.profileId);if(p){setSelP(p);loadAssigns(p.id);setView("detail")}}} style={{fontSize:11,color:DS.brand.blue700,background:"none",border:`1px solid ${DS.brand.blue700}`,borderRadius:DS.radius.sm,padding:"4px 12px",cursor:"pointer",fontFamily:DS.font.heading,fontWeight:600,flexShrink:0,alignSelf:"center"}}>View</button>}
+            </div>
+          ))}
+          <button type="button" onClick={()=>{setAdminAlerts([]);setAlertsLoading(false)}} style={{marginTop:8,fontSize:12,color:DS.text.muted,background:"none",border:"none",cursor:"pointer",fontFamily:DS.font.body,textDecoration:"underline"}}>Clear & Rescan</button>
+        </div>}
+      </div>
+    </div>)}
+
+    {/* ANA VIEW — see what Ana sees */}
+    {view==="ana_view"&&isAdmin&&(<div style={{position:"fixed",inset:0,zIndex:55,background:"rgba(15,23,42,0.5)",backdropFilter:"blur(3px)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={()=>setView("kanban")}>
+      <div style={{background:"#fff",borderRadius:DS.radius.xxl,padding:28,maxWidth:800,width:"100%",maxHeight:"85vh",overflowY:"auto",animation:"fadeUp .25s both",boxShadow:DS.shadow.lg}} onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+          <div><div style={{fontSize:18,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading}}>🧠 Ana View — Soft Skills</div><div style={{fontSize:12,color:DS.text.muted,fontFamily:DS.font.body,marginTop:2}}>See what Ana (Talent Discovery) sees for each profile</div></div>
+          <button type="button" onClick={()=>setView("kanban")} style={{background:DS.surface.sunken,border:"none",width:32,height:32,borderRadius:DS.radius.md,fontSize:14,cursor:"pointer",color:DS.text.faint}}>✕</button>
+        </div>
+        {ps.filter(p=>["pending_soft","in_progress","sourcing","filled"].includes(p.status)).map((p,i)=>{
+          const pd=p.profile_data||{};const ss=pd.softSkills||pd.recruiterReview;
+          return(<div key={p.id} style={{padding:"16px 18px",borderRadius:DS.radius.lg,border:`1px solid ${DS.surface.border}`,marginBottom:10,background:DS.surface.page,animation:`fadeUp .3s ${i*0.04}s both`}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+              <div><div style={{fontSize:14,fontWeight:600,color:DS.text.h1,fontFamily:DS.font.heading}}>{p.role} — {p.seniority}</div><div style={{fontSize:11,color:DS.text.muted,fontFamily:DS.font.body}}>{p.client_name} ({p.client_company})</div></div>
+              <span style={{fontSize:10,fontWeight:600,color:STATUS_COLORS[p.status],background:`${STATUS_COLORS[p.status]}15`,padding:"3px 10px",borderRadius:DS.radius.pill}}>{STATUS_LABELS[p.status]}</span>
+            </div>
+            {pd.recruiterReview&&<div style={{fontSize:12,color:"#C2410C",background:"#FFF7ED",padding:"8px 12px",borderRadius:DS.radius.sm,marginBottom:6,border:"1px solid #FDBA74"}}><strong>Recruiter:</strong> {pd.recruiterReview.notes||"Accepted"}{pd.recruiterReview.questionsForAna?.length?` · ${pd.recruiterReview.questionsForAna.length} questions`:""}</div>}
+            {ss?.personality&&<div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:6}}>{ss.personality.map(t=><span key={t} style={{padding:"2px 8px",borderRadius:DS.radius.pill,fontSize:10,background:"#F3F0FF",color:"#5B21B6",fontFamily:DS.font.body}}>{t}</span>)}</div>}
+            {ss?.softSkillsSummary&&<div style={{fontSize:11,color:DS.text.body,marginTop:6,lineHeight:1.5,fontFamily:DS.font.body}}>{ss.softSkillsSummary}</div>}
+            {!ss&&!pd.recruiterReview&&<div style={{fontSize:11,color:DS.text.faint,fontStyle:"italic"}}>No soft skills data yet</div>}
+          </div>);
+        })}
+        {ps.filter(p=>["pending_soft","in_progress","sourcing","filled"].includes(p.status)).length===0&&<div style={{textAlign:"center",padding:40,color:DS.text.faint}}><div style={{fontSize:36,marginBottom:8}}>🧠</div>No profiles have reached Ana yet</div>}
+      </div>
+    </div>)}
+
+    {/* SALES VIEW — see what Sales sees */}
+    {view==="sales_view"&&isAdmin&&(<div style={{position:"fixed",inset:0,zIndex:55,background:"rgba(15,23,42,0.5)",backdropFilter:"blur(3px)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={()=>setView("kanban")}>
+      <div style={{background:"#fff",borderRadius:DS.radius.xxl,padding:28,maxWidth:800,width:"100%",maxHeight:"85vh",overflowY:"auto",animation:"fadeUp .25s both",boxShadow:DS.shadow.lg}} onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+          <div><div style={{fontSize:18,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading}}>💼 Sales View</div><div style={{fontSize:12,color:DS.text.muted,fontFamily:DS.font.body,marginTop:2}}>Pipeline overview as Sales team sees it</div></div>
+          <button type="button" onClick={()=>setView("kanban")} style={{background:DS.surface.sunken,border:"none",width:32,height:32,borderRadius:DS.radius.md,fontSize:14,cursor:"pointer",color:DS.text.faint}}>✕</button>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:16}}>
+          {[["new","New"],["pending_review","Review"],["pending_soft","Discovery"],["filled","Filled"]].map(([s,l])=>(
+            <div key={s} style={{background:DS.surface.page,borderRadius:DS.radius.lg,padding:"14px",textAlign:"center",border:`1px solid ${DS.surface.border}`}}>
+              <div style={{fontSize:24,fontWeight:800,color:DS.text.h1,fontFamily:DS.font.heading}}>{ps.filter(p=>p.status===s).length}</div>
+              <div style={{fontSize:10,color:DS.text.muted,fontFamily:DS.font.body,marginTop:2}}>{l}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{fontSize:13,fontWeight:600,color:DS.text.h2,fontFamily:DS.font.heading,marginBottom:10}}>By Client</div>
+        {[...new Set(ps.map(p=>p.client_company).filter(Boolean))].map(company=>{
+          const cps=ps.filter(p=>p.client_company===company);
+          return(<div key={company} style={{padding:"12px 16px",borderRadius:DS.radius.lg,border:`1px solid ${DS.surface.border}`,marginBottom:6,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div><div style={{fontSize:13,fontWeight:600,color:DS.text.h1,fontFamily:DS.font.heading}}>{company}</div><div style={{fontSize:11,color:DS.text.muted,fontFamily:DS.font.body}}>{cps.length} profile{cps.length>1?"s":""}</div></div>
+            <div style={{display:"flex",gap:6}}>{Object.entries(STATUS_LABELS).filter(([k])=>cps.some(p=>p.status===k)).map(([k])=><div key={k} style={{width:8,height:8,borderRadius:"50%",background:STATUS_COLORS[k]}} title={STATUS_LABELS[k]}/>)}</div>
+          </div>);
+        })}
+      </div>
+    </div>)}
+
+    {/* CLIENT VIEW — see what client form looks like */}
+    {view==="client_view"&&isAdmin&&(<div style={{position:"fixed",inset:0,zIndex:55,background:"rgba(15,23,42,0.5)",backdropFilter:"blur(3px)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={()=>setView("kanban")}>
+      <div style={{background:"#fff",borderRadius:DS.radius.xxl,padding:28,maxWidth:800,width:"100%",maxHeight:"85vh",overflowY:"auto",animation:"fadeUp .25s both",boxShadow:DS.shadow.lg}} onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+          <div><div style={{fontSize:18,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading}}>👁️ Client Submissions</div><div style={{fontSize:12,color:DS.text.muted,fontFamily:DS.font.body,marginTop:2}}>Raw data as submitted by clients</div></div>
+          <button type="button" onClick={()=>setView("kanban")} style={{background:DS.surface.sunken,border:"none",width:32,height:32,borderRadius:DS.radius.md,fontSize:14,cursor:"pointer",color:DS.text.faint}}>✕</button>
+        </div>
+        {ps.slice(0,15).map((p,i)=>{
+          const pd=p.profile_data||{};
+          return(<div key={p.id} style={{padding:"16px 18px",borderRadius:DS.radius.lg,border:`1px solid ${DS.surface.border}`,marginBottom:8,animation:`fadeUp .3s ${i*0.03}s both`}} onClick={()=>{setSelP(p);loadAssigns(p.id);setView("detail")}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8,cursor:"pointer"}}>
+              <div><div style={{fontSize:14,fontWeight:600,color:DS.text.h1,fontFamily:DS.font.heading}}>{p.role} — {p.seniority}</div><div style={{fontSize:11,color:DS.text.muted,fontFamily:DS.font.body,marginTop:2}}>{p.client_name} ({p.client_company}) · {p.client_email}</div></div>
+              <span style={{fontSize:10,fontWeight:600,color:STATUS_COLORS[p.status],background:`${STATUS_COLORS[p.status]}15`,padding:"3px 10px",borderRadius:DS.radius.pill}}>{STATUS_LABELS[p.status]}</span>
+            </div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+              {[...(pd.techStack?.languages||[]),...(pd.techStack?.frameworks||[])].slice(0,8).map(t=><span key={t} style={{padding:"2px 8px",borderRadius:DS.radius.pill,fontSize:10,background:DS.brand.blue50,color:DS.brand.blue700,fontFamily:DS.font.body,border:`1px solid ${DS.brand.blue100}`}}>{t}</span>)}
+              {pd.mustHave?.slice(0,3).map(t=><span key={t} style={{padding:"2px 8px",borderRadius:DS.radius.pill,fontSize:10,background:"#fef2f2",color:"#dc2626",fontFamily:DS.font.body,border:"1px solid #fecaca"}}>Must: {t}</span>)}
+            </div>
+            <div style={{fontSize:10,color:DS.text.faint,marginTop:6,fontFamily:DS.font.body}}>{pd.experience} · {pd.englishLevel||"—"} · {pd.location||"—"} · Submitted {new Date(p.created_at).toLocaleDateString()}</div>
+          </div>);
+        })}
+      </div>
+    </div>)}
     {copyToast&&<div style={{position:"fixed",top:20,left:"50%",transform:"translateX(-50%)",zIndex:100,background:copyToast.includes("⚠️")?"#dc2626":"#0D2550",color:"#fff",padding:"12px 28px",borderRadius:12,fontSize:13,fontWeight:500,boxShadow:"0 8px 32px rgba(13,37,80,0.3)",animation:"fadeUp .3s both",maxWidth:"90vw",textAlign:"center"}}>{copyToast}</div>}
     <Footer/>
     </div>
@@ -1367,30 +1479,37 @@ function AnaModule({user}){
 
   if(ld)return<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:DS.surface.sunken}}><Spinner text="Loading profiles..."/></div>;
 
-  return(<div style={{minHeight:"100vh",background:DS.surface.page,fontFamily:DS.font.body,display:"flex",flexDirection:"column"}}>
-    {toast&&<div style={{position:"fixed",top:20,left:"50%",transform:"translateX(-50%)",zIndex:100,background:toast.includes("⚠️")?"#dc2626":"#5B21B6",color:"#fff",padding:"10px 24px",borderRadius:DS.radius.md,fontSize:13,fontWeight:500,boxShadow:DS.shadow.lg,animation:"fadeUp .3s both",maxWidth:"90vw",textAlign:"center"}}>{toast}</div>}
-    {/* Header */}
-    <div style={{background:DS.brand.navy900,padding:"0",position:"relative",overflow:"hidden"}}>
-      <div style={{maxWidth:900,margin:"0 auto",padding:"16px 24px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative",zIndex:1}}>
-        <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <div style={{width:32,height:32,borderRadius:8,background:"#7C3AED",display:"flex",alignItems:"center",justifyContent:"center"}}>
-            <span style={{fontSize:13,fontWeight:800,color:"#fff",fontFamily:DS.font.heading}}>B</span>
+  return(<div style={{minHeight:"100vh",background:`linear-gradient(160deg,#F3F0FF,#EDE9FE 30%,${DS.surface.page})`,fontFamily:DS.font.body,display:"flex",flexDirection:"column"}}>
+    {toast&&<div style={{position:"fixed",top:20,left:"50%",transform:"translateX(-50%)",zIndex:100,background:toast.includes("⚠️")?"#dc2626":DS.brand.navy900,color:"#fff",padding:"12px 28px",borderRadius:DS.radius.lg,fontSize:13,fontWeight:500,boxShadow:DS.shadow.lg,animation:"fadeUp .3s both",maxWidth:"90vw",textAlign:"center",zIndex:100}}>{toast}</div>}
+    {/* Header — purple accent for Ana */}
+    <div style={{background:"linear-gradient(135deg,#2E1065,#5B21B6,#7C3AED)",padding:"0",position:"relative",overflow:"hidden"}}>
+      <HeaderBG/>
+      <div style={{maxWidth:900,margin:"0 auto",padding:"18px 24px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative",zIndex:1}}>
+        <div style={{display:"flex",alignItems:"center",gap:14}}>
+          <span style={{fontSize:22,fontWeight:800,color:"#fff",letterSpacing:1.5,fontFamily:DS.font.heading}}>BOZ<span style={{color:"#c084fc"}}>.</span></span>
+          <div style={{height:20,width:1,background:"rgba(255,255,255,0.15)"}}/>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <div style={{width:34,height:34,borderRadius:DS.radius.md,background:"rgba(255,255,255,0.1)",display:"flex",alignItems:"center",justifyContent:"center",border:"1px solid rgba(255,255,255,0.15)",position:"relative"}}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="7" r="4"/>
+                <path d="M5.5 21v-2a5.5 5.5 0 0111 0v2"/>
+                <text x="18" y="18" fill="rgba(192,132,252,0.9)" fontSize="10" fontWeight="700" fontFamily="serif" stroke="none">Ψ</text>
+              </svg>
+            </div>
+            <div><div style={{fontSize:12,fontWeight:600,color:"#fff",fontFamily:DS.font.heading}}>Talent Discovery</div><div style={{fontSize:9,color:"rgba(192,132,252,0.7)",fontFamily:DS.font.body,letterSpacing:1}}>Soft Skills Analyst</div></div>
           </div>
-          <div><div style={{fontSize:15,fontWeight:800,color:"#fff",letterSpacing:0.5,fontFamily:DS.font.heading}}>BOZ<span style={{color:"#C084FC"}}>.</span></div></div>
-          <div style={{height:16,width:1,background:"rgba(255,255,255,0.1)",margin:"0 4px"}}/>
-          <div><div style={{fontSize:12,fontWeight:600,color:"rgba(192,132,252,0.8)",fontFamily:DS.font.heading}}>Talent Discovery</div><div style={{fontSize:9,color:"rgba(255,255,255,0.25)",fontFamily:DS.font.body,letterSpacing:1}}>Soft Skills Analyst</div></div>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <span style={{fontSize:12,color:"rgba(255,255,255,0.5)",fontFamily:DS.font.body}}>{user.email}</span>
-          <button onClick={signOut} type="button" style={{fontSize:11,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"6px 14px",color:"rgba(255,255,255,0.5)",cursor:"pointer",fontFamily:DS.font.body,transition:"all .15s"}} onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,0.08)"}} onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.04)"}}>Sign Out</button>
+          <span style={{fontSize:12,color:"rgba(255,255,255,0.7)",fontFamily:DS.font.body}}>{user.email}</span>
+          <button onClick={signOut} type="button" style={{fontSize:11,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.15)",borderRadius:DS.radius.md,padding:"7px 14px",color:"rgba(255,255,255,0.7)",cursor:"pointer",fontFamily:DS.font.body}}>Sign Out</button>
         </div>
       </div>
     </div>
 
     <div style={{maxWidth:900,margin:"0 auto",padding:"24px",flex:1,width:"100%"}}>
       {view==="list"&&(<div style={{animation:"fadeUp .3s both"}}>
-        <div style={{fontSize:18,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading,marginBottom:2,letterSpacing:"-0.02em"}}>Profile Requests</div>
-        <div style={{fontSize:12,color:DS.text.muted,fontFamily:DS.font.body,marginBottom:16}}>Select a profile to add soft skills from your client meeting</div>
+        <div style={{fontSize:20,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading,marginBottom:4}}>Profile Requests</div>
+        <div style={{fontSize:13,color:DS.text.muted,fontFamily:DS.font.body,marginBottom:16}}>Select a profile to add soft skills from your client meeting</div>
         {/* Sort & Filter */}
         <div style={{display:"flex",gap:10,marginBottom:16,flexWrap:"wrap"}}>
           <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{fontSize:12,border:`1.5px solid ${DS.surface.border}`,borderRadius:DS.radius.sm,padding:"7px 12px",fontFamily:DS.font.body,color:DS.text.body,background:"#fff",cursor:"pointer"}}>
@@ -1605,6 +1724,7 @@ function ClientForm({user}){
   const[hardPct,setHardPct]=useState(70);
   const[aiObjective,setAiObjective]=useState("");const[aiResponsibilities,setAiResponsibilities]=useState([]);const[aiSoftSkills,setAiSoftSkills]=useState([]);
   const[aiGenerating,setAiGenerating]=useState(false);const[aiGenerated,setAiGenerated]=useState(false);
+  const[aiSuggestions,setAiSuggestions]=useState([]);const[suggestLoading,setSuggestLoading]=useState(false);const[dismissedSugg,setDismissedSugg]=useState([]);
 
   useEffect(()=>{getMyProfiles().then(setMyPs).catch(()=>{})},[user.id]);
   const show=(m)=>{setToast(m);setTimeout(()=>setToast(""),3500)};
@@ -1649,6 +1769,39 @@ function ClientForm({user}){
 
   // Re-generate with AI
   const regenerateAI=()=>{setAiGenerated(false);generateAI()};
+
+  // ═══ PHASE 2: INTELLIGENT SUGGESTIONS ═══
+  const fetchSuggestions=async(extracted)=>{
+    setSuggestLoading(true);setAiSuggestions([]);setDismissedSugg([]);
+    try{
+      const ctx=JSON.stringify({role:extracted.role,category:extracted.category,seniority:extracted.seniority,
+        languages:extracted.languages,frameworks:extracted.frameworks,clouds:extracted.clouds,
+        cloudServices:extracted.cloudServices,databases:extracted.databases,devops:extracted.devops,
+        mustHave:extracted.mustHave,niceToHave:extracted.niceToHave,methodology:extracted.methodology,
+        industry:extracted.industry});
+      const raw=await callClaude([{role:"user",content:`Extracted profile:\n${ctx}\n\nAnalyze gaps and suggest completions.`}],AI_PROMPTS.suggest_completions);
+      const parsed=JSON.parse(raw.replace(/```json|```/g,"").trim());
+      if(parsed.suggestions?.length)setAiSuggestions(parsed.suggestions);
+    }catch(e){console.warn("Suggestions error:",e.message)}finally{setSuggestLoading(false)}
+  };
+  const acceptSuggestion=(sugg)=>{
+    const items=sugg.items||[];
+    switch(sugg.category){
+      case"databases":setDbs(p=>[...new Set([...p,...items])]);break;
+      case"devops":setDvps(p=>[...new Set([...p,...items])]);break;
+      case"frameworks":setFws(p=>[...new Set([...p,...items])]);break;
+      case"clouds":setClds(p=>[...new Set([...p,...items])]);break;
+      case"cloudServices":setCldSvcs(p=>[...new Set([...p,...items])]);break;
+      case"languages":setLangs(p=>[...new Set([...p,...items])]);break;
+      case"qaTools":setQas(p=>[...new Set([...p,...items])]);break;
+      case"methodology":setMeths(p=>[...new Set([...p,...items])]);break;
+      default:break;
+    }
+    setNh(p=>[...new Set([...p,...items])]);
+    setDismissedSugg(p=>[...p,sugg.category+items.join(",")]);
+    show(`✅ Added: ${items.join(", ")}`);
+  };
+  const dismissSuggestion=(sugg)=>{setDismissedSugg(p=>[...p,sugg.category+(sugg.items||[]).join(",")]);};
 
   const tMH=(i)=>{if(mh.includes(i)){setMh(p=>p.filter(x=>x!==i));return}setNh(p=>p.filter(x=>x!==i));setMh(p=>[...p,i])};
   const tNH=(i)=>{if(nh.includes(i)){setNh(p=>p.filter(x=>x!==i));return}setMh(p=>p.filter(x=>x!==i));setNh(p=>[...p,i])};
@@ -1721,12 +1874,15 @@ function ClientForm({user}){
 
     if(missing.length>0){
       setMissingFields(missing);show(`✅ Extracted! ${missing.length} fields need your input`);
+      fetchSuggestions(a);
     }else{
-      show("✅ Profile auto-filled! Review and submit.");go(7);
+      show("✅ Profile auto-filled! Review and submit.");
+      fetchSuggestions(a);
+      go(7);
     }
   };
 
-  const handleReset=()=>{setStep(0);setDir(1);setCName("");setCComp("");setUpFile(null);setAnl(null);setUpErr("");setMissingFields([]);setCat("");setRole("");setCRole("");setRSrch("");setSen("");setExp("");setHc(1);setEng("");setSTime("9:00");setETime("17:00");setWHrs(40);setTz("");setLangs([]);setVers({});setFws([]);setFwVers({});setClds([]);setCldSvcs([]);setOtherCloud("");setDbs([]);setDbVers({});setDvps([]);setDvpVers({});setErps([]);setErpVers({});setQas([]);setOTech("");setMh([]);setNh([]);setShowAll(false);setEngl("");setLoc("");setAcad("");setCerts("");setMeths([]);setInds([]);setAiTs([]);setOtherAI("");setProfTools([]);setAiObjective("");setAiResponsibilities([]);setAiSoftSkills([]);setAiGenerated(false);setVisa("");setTravel("");setNotes("");setSDate("");setHolCo("");setHardPct(70);setAk(k=>k+1);setDone(false);setPdfL("")};
+  const handleReset=()=>{setStep(0);setDir(1);setCName("");setCComp("");setUpFile(null);setAnl(null);setUpErr("");setMissingFields([]);setAiSuggestions([]);setSuggestLoading(false);setDismissedSugg([]);setCat("");setRole("");setCRole("");setRSrch("");setSen("");setExp("");setHc(1);setEng("");setSTime("9:00");setETime("17:00");setWHrs(40);setTz("");setLangs([]);setVers({});setFws([]);setFwVers({});setClds([]);setCldSvcs([]);setOtherCloud("");setDbs([]);setDbVers({});setDvps([]);setDvpVers({});setErps([]);setErpVers({});setQas([]);setOTech("");setMh([]);setNh([]);setShowAll(false);setEngl("");setLoc("");setAcad("");setCerts("");setMeths([]);setInds([]);setAiTs([]);setOtherAI("");setProfTools([]);setAiObjective("");setAiResponsibilities([]);setAiSoftSkills([]);setAiGenerated(false);setVisa("");setTravel("");setNotes("");setSDate("");setHolCo("");setHardPct(70);setAk(k=>k+1);setDone(false);setPdfL("")};
 
   const canN=()=>{if(step===0)return cName.trim()&&cComp.trim();if(step===1)return true;if(step===2)return cat&&(role&&role!=="__custom"||cRole.trim());if(step===3)return sen&&exp;return true};
 
@@ -1806,6 +1962,33 @@ function ClientForm({user}){
           </div>
         )}
       </div>
+      {/* ═══ AI INTELLIGENT SUGGESTIONS (Phase 2) ═══ */}
+      {(suggestLoading||aiSuggestions.filter(s=>!dismissedSugg.includes(s.category+(s.items||[]).join(","))).length>0)&&(
+        <div style={{background:"#fff",borderRadius:DS.radius.xl,padding:"20px 24px",border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm,marginBottom:16,animation:"fadeUp .3s both"}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}>
+            <div style={{width:32,height:32,borderRadius:DS.radius.md,background:`linear-gradient(135deg,${DS.brand.blue50},#e0f2fe)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15}}>💡</div>
+            <div><div style={{fontSize:13,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading}}>AI Suggestions</div><div style={{fontSize:11,color:DS.text.faint,fontFamily:DS.font.body}}>Optional — technologies you may need based on role analysis</div></div>
+          </div>
+          {suggestLoading&&<div style={{display:"flex",alignItems:"center",gap:10,padding:"14px 0"}}><div style={{width:18,height:18,border:`2.5px solid ${DS.surface.border}`,borderTop:`2.5px solid ${DS.brand.blue700}`,borderRadius:"50%",animation:"spin 1s linear infinite"}}/><span style={{fontSize:12,color:DS.text.muted,fontFamily:DS.font.body}}>Analyzing profile for technical gaps...</span></div>}
+          {!suggestLoading&&<div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {aiSuggestions.filter(s=>!dismissedSugg.includes(s.category+(s.items||[]).join(","))).map((s,i)=>(
+              <div key={i} style={{display:"flex",alignItems:"flex-start",gap:14,padding:"14px 16px",background:`linear-gradient(135deg,${DS.brand.blue50},#fff)`,borderRadius:DS.radius.lg,border:`1px solid rgba(27,111,232,0.08)`,transition:`all .2s ${DS.ease.snap}`}}>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:10,fontWeight:700,color:DS.brand.blue700,textTransform:"uppercase",letterSpacing:"0.05em",fontFamily:DS.font.body,marginBottom:5}}>{s.category}</div>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:6}}>{(s.items||[]).map(item=>(
+                    <span key={item} style={{padding:"3px 10px",borderRadius:DS.radius.pill,fontSize:11,background:"#fff",color:DS.brand.blue700,fontFamily:DS.font.body,fontWeight:600,border:`1px solid ${DS.brand.blue100}`,boxShadow:"0 1px 2px rgba(0,0,0,0.03)"}}>{item}</span>
+                  ))}</div>
+                  <div style={{fontSize:11,color:DS.text.muted,fontFamily:DS.font.body,lineHeight:1.5}}>{s.reason}</div>
+                </div>
+                <div style={{display:"flex",gap:5,flexShrink:0,paddingTop:2}}>
+                  <button type="button" onClick={()=>acceptSuggestion(s)} style={{padding:"7px 14px",fontSize:11,fontWeight:600,background:`linear-gradient(135deg,${DS.brand.navy900},${DS.brand.blue700})`,color:"#fff",border:"none",borderRadius:DS.radius.md,cursor:"pointer",fontFamily:DS.font.heading,boxShadow:DS.shadow.blue,transition:`all .2s ${DS.ease.snap}`}}>+ Add</button>
+                  <button type="button" onClick={()=>dismissSuggestion(s)} style={{padding:"7px 12px",fontSize:11,fontWeight:500,background:"#fff",color:DS.text.faint,border:`1.5px solid ${DS.surface.border}`,borderRadius:DS.radius.md,cursor:"pointer",fontFamily:DS.font.body,transition:`all .2s ${DS.ease.snap}`}}>Skip</button>
+                </div>
+              </div>
+            ))}
+          </div>}
+        </div>
+      )}
       <button type="button" onClick={()=>{setMissingFields([]);go(7)}} style={{width:"100%",background:`linear-gradient(135deg,${DS.brand.navy900},${DS.brand.blue700})`,color:"#fff",border:"none",borderRadius:DS.radius.md,padding:16,fontSize:15,fontWeight:700,cursor:"pointer",fontFamily:DS.font.heading,boxShadow:DS.shadow.blue}}>Continue to Review →</button>
     </div>)}
   </div>);
@@ -1999,10 +2182,11 @@ function ClientForm({user}){
 
   const renderH=()=>(<div style={{animation:"fadeUp .3s both"}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:20}}><h2 style={{fontSize:18,fontWeight:700,color:"#0D2550"}}>My Requests ({myPs.length})</h2><button type="button" onClick={()=>setShowH(false)} style={{fontSize:13,color:"#1B6FE8",background:"none",border:"none",cursor:"pointer",fontFamily:"inherit",fontWeight:500}}>← Back</button></div>{!myPs.length?<div style={{textAlign:"center",padding:48,color:"#94a3b8"}}><div style={{fontSize:40,marginBottom:8}}>📂</div>No requests yet.</div>:myPs.map(p=>(<div key={p.id} style={{background:"rgba(255,255,255,0.85)",border:"1.5px solid #e2e8f0",borderRadius:14,padding:16,marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",flexWrap:"wrap",gap:8}}><div><div style={{fontSize:14,fontWeight:600,color:"#0D2550"}}>{p.role} — {p.seniority}</div><div style={{fontSize:12,color:"#64748b"}}>{p.category} · {p.client_company}</div><div style={{fontSize:11,color:"#94a3b8"}}>{new Date(p.created_at).toLocaleDateString()}</div></div><div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:11,fontWeight:600,color:STATUS_COLORS[p.status],background:`${STATUS_COLORS[p.status]}15`,padding:"4px 10px",borderRadius:20}}>{STATUS_LABELS[p.status]||"New"}</span><a href={`/api/pdf/${p.id}`} target="_blank" rel="noopener noreferrer" style={{fontSize:11,color:"#1B6FE8",border:"1px solid #1B6FE8",borderRadius:6,padding:"4px 10px",textDecoration:"none"}}>PDF</a></div></div></div>))}</div>);
 
-  return(<div style={{minHeight:"100vh",background:DS.surface.page,fontFamily:DS.font.body,display:"flex",flexDirection:"column"}}>
-    {toast&&<div style={{position:"fixed",top:20,left:"50%",transform:"translateX(-50%)",zIndex:100,background:DS.brand.navy900,color:"#fff",padding:"10px 24px",borderRadius:DS.radius.md,fontSize:13,fontWeight:500,boxShadow:DS.shadow.lg,animation:"fadeUp .3s both",whiteSpace:"nowrap",maxWidth:"90vw",overflow:"hidden",textOverflow:"ellipsis"}}>{toast}</div>}
-    <div style={{background:DS.brand.navy900,padding:isMob?"12px 0 10px":"14px 0 20px",position:"sticky",top:0,zIndex:30,boxShadow:"0 1px 3px rgba(0,0,0,0.1)"}}>
-      <div style={{maxWidth:880,margin:"0 auto",padding:"0 16px",position:"relative",zIndex:1}}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}><div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:28,height:28,borderRadius:6,background:DS.brand.blue700,display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{fontSize:11,fontWeight:800,color:"#fff",fontFamily:DS.font.heading}}>B</span></div><div style={{fontSize:isMob?15:16,fontWeight:800,color:"#fff",letterSpacing:0.5,fontFamily:DS.font.heading}}>BOZ<span style={{color:DS.brand.cyan600}}>.</span></div>{!isMob&&<span style={{fontSize:12,color:"rgba(255,255,255,0.35)",fontFamily:DS.font.body,marginLeft:4}}>Verified Fit</span>}</div><div style={{display:"flex",gap:5}}><button type="button" onClick={()=>setShowH(!showH)} style={{fontSize:11,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:isMob?"5px 8px":"6px 12px",color:"rgba(255,255,255,0.6)",cursor:"pointer",fontFamily:DS.font.body,display:"flex",alignItems:"center",gap:4,fontWeight:500,transition:"all .15s"}}>History<span style={{background:"rgba(255,255,255,0.1)",padding:"1px 6px",borderRadius:4,fontSize:10}}>{myPs.length}</span></button><button type="button" onClick={handleReset} style={{fontSize:11,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:isMob?"5px 8px":"6px 12px",color:"rgba(255,255,255,0.5)",cursor:"pointer",fontFamily:DS.font.body,transition:"all .15s"}}>Reset</button><button type="button" onClick={signOut} style={{fontSize:11,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:6,padding:isMob?"5px 8px":"6px 12px",color:"rgba(255,255,255,0.35)",cursor:"pointer",fontFamily:DS.font.body,transition:"all .15s"}}>Out</button></div></div>
+  return(<div style={{minHeight:"100vh",background:"linear-gradient(160deg,#EEF2F7 0%,#E8EEF6 30%,#F8FAFC 100%)",fontFamily:DS.font.body,display:"flex",flexDirection:"column"}}>
+    {toast&&<div style={{position:"fixed",top:20,left:"50%",transform:"translateX(-50%)",zIndex:100,background:"#0D2550",color:"#fff",padding:"12px 28px",borderRadius:12,fontSize:13,fontWeight:500,boxShadow:"0 8px 32px rgba(13,37,80,0.3)",animation:"fadeUp .3s both",whiteSpace:"nowrap",maxWidth:"90vw",overflow:"hidden",textOverflow:"ellipsis"}}>{toast}</div>}
+    <div style={{background:`linear-gradient(135deg,${DS.brand.navy900},#1B3A70 60%,${DS.brand.blue700})`,padding:isMob?"16px 0 12px":"20px 0 28px",position:"sticky",top:0,zIndex:30,boxShadow:"0 4px 24px rgba(13,37,80,0.2)",overflow:"hidden"}}>
+      <HeaderBG/>
+      <div style={{maxWidth:880,margin:"0 auto",padding:"0 16px",position:"relative",zIndex:1}}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}><div style={{fontSize:isMob?18:22,fontWeight:800,color:"#fff",letterSpacing:1.5,fontFamily:DS.font.heading}}>BOZ<span style={{color:DS.brand.cyan600}}>.</span>{!isMob&&<span style={{fontSize:13,fontWeight:400,marginLeft:10,opacity:.6,fontFamily:DS.font.body}}>Verified Fit</span>}</div><div style={{display:"flex",gap:6}}><button type="button" onClick={()=>setShowH(!showH)} style={{fontSize:isMob?11:12,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:DS.radius.md,padding:isMob?"5px 10px":"7px 14px",color:"rgba(255,255,255,0.85)",cursor:"pointer",fontFamily:DS.font.body,display:"flex",alignItems:"center",gap:5,fontWeight:500}}>📂{!isMob&&" History"}<span style={{background:"rgba(255,255,255,0.15)",padding:"1px 7px",borderRadius:DS.radius.pill,fontSize:10}}>{myPs.length}</span></button><button type="button" onClick={handleReset} style={{fontSize:isMob?11:12,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:DS.radius.md,padding:isMob?"5px 10px":"7px 14px",color:"rgba(255,255,255,0.85)",cursor:"pointer",fontFamily:DS.font.body}}>↺</button><button type="button" onClick={signOut} style={{fontSize:isMob?11:12,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:DS.radius.md,padding:isMob?"5px 10px":"7px 14px",color:"rgba(255,255,255,0.55)",cursor:"pointer",fontFamily:DS.font.body}}>Out</button></div></div>
       {!showH&&<div style={{padding:"8px 0 0"}}>
         {/* Progress dots + lines */}
         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"center",gap:0}}>
@@ -2092,51 +2276,83 @@ function SalesModule({user}){
 
   if(ld)return<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:DS.surface.page}}><Spinner text="Loading..."/></div>;
 
-  return(<div style={{minHeight:"100vh",background:DS.surface.page,fontFamily:DS.font.body,display:"flex",flexDirection:"column"}}>
-    {toast&&<div style={{position:"fixed",top:20,left:"50%",transform:"translateX(-50%)",zIndex:100,background:toast.includes("⚠️")?"#dc2626":"#059669",color:"#fff",padding:"10px 24px",borderRadius:DS.radius.md,fontSize:13,fontWeight:500,boxShadow:DS.shadow.lg,animation:"fadeUp .3s both"}}>{toast}</div>}
-    <div style={{background:DS.brand.navy900,padding:"0",position:"relative",overflow:"hidden"}}>
-      <div style={{maxWidth:1000,margin:"0 auto",padding:"16px 24px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative",zIndex:1}}>
-        <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <div style={{width:32,height:32,borderRadius:8,background:"#059669",display:"flex",alignItems:"center",justifyContent:"center"}}>
-            <span style={{fontSize:13,fontWeight:800,color:"#fff",fontFamily:DS.font.heading}}>B</span>
+  return(<div style={{minHeight:"100vh",background:`linear-gradient(160deg,#ECFDF5,#D1FAE5 30%,${DS.surface.page})`,fontFamily:DS.font.body,display:"flex",flexDirection:"column"}}>
+    {toast&&<div style={{position:"fixed",top:20,left:"50%",transform:"translateX(-50%)",zIndex:100,background:toast.includes("⚠️")?"#dc2626":"#059669",color:"#fff",padding:"12px 28px",borderRadius:DS.radius.lg,fontSize:13,fontWeight:500,boxShadow:DS.shadow.lg,animation:"fadeUp .3s both"}}>{toast}</div>}
+    <div style={{background:"linear-gradient(135deg,#064E3B,#059669,#10b981)",padding:"0",position:"relative",overflow:"hidden"}}>
+      <HeaderBG/>
+      <div style={{maxWidth:1000,margin:"0 auto",padding:"18px 24px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative",zIndex:1}}>
+        <div style={{display:"flex",alignItems:"center",gap:14}}>
+          <span style={{fontSize:22,fontWeight:800,color:"#fff",letterSpacing:1.5,fontFamily:DS.font.heading}}>BOZ<span style={{color:"#6EE7B7"}}>.</span></span>
+          <div style={{height:20,width:1,background:"rgba(255,255,255,0.15)"}}/>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <div style={{width:30,height:30,borderRadius:DS.radius.md,background:"rgba(255,255,255,0.12)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>💼</div>
+            <span style={{fontSize:12,fontWeight:600,color:"rgba(255,255,255,0.8)",fontFamily:DS.font.heading}}>Sales</span>
           </div>
-          <div><div style={{fontSize:15,fontWeight:800,color:"#fff",letterSpacing:0.5,fontFamily:DS.font.heading}}>BOZ<span style={{color:"#6EE7B7"}}>.</span></div></div>
-          <div style={{height:16,width:1,background:"rgba(255,255,255,0.1)",margin:"0 4px"}}/>
-          <span style={{fontSize:12,fontWeight:600,color:"rgba(110,231,183,0.8)",fontFamily:DS.font.heading}}>Sales</span>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <span style={{fontSize:12,color:"rgba(255,255,255,0.5)",fontFamily:DS.font.body}}>{user.email}</span>
-          <button onClick={signOut} type="button" style={{fontSize:11,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"6px 14px",color:"rgba(255,255,255,0.5)",cursor:"pointer",fontFamily:DS.font.body,transition:"all .15s"}} onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,0.08)"}} onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.04)"}}>Sign Out</button>
+          <span style={{fontSize:12,color:"rgba(255,255,255,0.7)",fontFamily:DS.font.body}}>{user.email}</span>
+          <button onClick={signOut} type="button" style={{fontSize:11,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.15)",borderRadius:DS.radius.md,padding:"7px 14px",color:"rgba(255,255,255,0.7)",cursor:"pointer",fontFamily:DS.font.body}}>Sign Out</button>
         </div>
       </div>
     </div>
     <div style={{maxWidth:1000,margin:"0 auto",padding:"24px",flex:1,width:"100%"}}>
       {/* Send link card */}
-      <div style={{background:"#fff",borderRadius:DS.radius.md,padding:"20px 24px",marginBottom:16,border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.card}}>
-        <div style={{fontSize:15,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading,marginBottom:2,letterSpacing:"-0.02em"}}>Client Intake Link</div>
-        <div style={{fontSize:12,color:DS.text.muted,fontFamily:DS.font.body,marginBottom:14}}>Share this link so clients can submit staffing requirements</div>
-        <div style={{display:"flex",gap:8,marginBottom:10,flexWrap:"wrap"}}>
-          <div style={{flex:1,minWidth:200,background:DS.surface.sunken,borderRadius:6,padding:"10px 14px",fontSize:12,color:DS.text.muted,fontFamily:DS.font.mono,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",border:`1px solid ${DS.surface.border}`}}>{clientLink}</div>
-          <button type="button" onClick={copyLink} style={{background:linkCopied?"#059669":"#059669",color:"#fff",border:"none",borderRadius:6,padding:"10px 20px",fontSize:12,fontWeight:600,fontFamily:DS.font.heading,cursor:"pointer",transition:"all .15s",opacity:linkCopied?0.8:1}}>{linkCopied?"Copied":"Copy Link"}</button>
+      <div style={{background:"#fff",borderRadius:DS.radius.xl,padding:"24px 28px",marginBottom:20,border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm}}>
+        <div style={{fontSize:16,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading,marginBottom:4}}>Send Profile Request to Client</div>
+        <div style={{fontSize:12,color:DS.text.muted,fontFamily:DS.font.body,marginBottom:16}}>Share this link so clients can fill out their staffing requirements</div>
+        <div style={{display:"flex",gap:10,marginBottom:12,flexWrap:"wrap"}}>
+          <div style={{flex:1,minWidth:200,background:DS.surface.sunken,borderRadius:DS.radius.md,padding:"12px 16px",fontSize:13,color:DS.text.body,fontFamily:"monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",border:`1px solid ${DS.surface.border}`}}>{clientLink}</div>
+          <button type="button" onClick={copyLink} style={{background:linkCopied?"#059669":`linear-gradient(135deg,#064E3B,#059669)`,color:"#fff",border:"none",borderRadius:DS.radius.md,padding:"12px 24px",fontSize:13,fontWeight:600,fontFamily:DS.font.heading,cursor:"pointer",transition:"all .2s",boxShadow:"0 4px 12px rgba(5,150,105,0.2)"}}>{linkCopied?"✓ Copied!":"📋 Copy Link"}</button>
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
-          <input type="email" value={inviteEmail} onChange={e=>setInviteEmail(e.target.value)} placeholder="client@company.com" style={{flex:1,border:`1px solid ${DS.surface.border}`,borderRadius:6,padding:"9px 14px",fontSize:12,fontFamily:DS.font.body,outline:"none",transition:"border-color .15s"}} onFocus={e=>{e.target.style.borderColor="#059669"}} onBlur={e=>{e.target.style.borderColor=DS.surface.border}}/>
-          <button type="button" onClick={sendInvite} style={{background:"#fff",color:"#059669",border:"1.5px solid #059669",borderRadius:6,padding:"9px 18px",fontSize:12,fontWeight:600,fontFamily:DS.font.heading,cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>{e.currentTarget.style.background="#059669";e.currentTarget.style.color="#fff"}} onMouseLeave={e=>{e.currentTarget.style.background="#fff";e.currentTarget.style.color="#059669"}}>Send Invite</button>
+          <input type="email" value={inviteEmail} onChange={e=>setInviteEmail(e.target.value)} placeholder="client@company.com" style={{flex:1,border:`1.5px solid ${DS.surface.border}`,borderRadius:DS.radius.sm,padding:"10px 14px",fontSize:13,fontFamily:DS.font.body,outline:"none"}}/>
+          <button type="button" onClick={sendInvite} style={{background:"#fff",color:"#059669",border:"1.5px solid #059669",borderRadius:DS.radius.md,padding:"10px 20px",fontSize:12,fontWeight:600,fontFamily:DS.font.heading,cursor:"pointer"}}>📧 Send Invite</button>
         </div>
       </div>
 
       {/* Status overview */}
-      <div style={{display:"grid",gridTemplateColumns:isMob?"repeat(2,1fr)":"repeat(4,1fr)",gap:8,marginBottom:16}}>
+      <div style={{display:"grid",gridTemplateColumns:isMob?"repeat(2,1fr)":"repeat(4,1fr)",gap:10,marginBottom:20}}>
         {[["new","New Requests"],["pending_review","In Review"],["pending_soft","Talent Discovery"],["filled","Filled"]].map(([s,label])=>(
-          <div key={s} style={{background:"#fff",borderRadius:DS.radius.md,padding:"14px 16px",border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.card,position:"relative",overflow:"hidden"}}>
-            <div style={{fontSize:11,color:DS.text.faint,fontWeight:500,fontFamily:DS.font.body,marginBottom:4}}>{label}</div>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
-              <div style={{fontSize:26,fontWeight:800,color:DS.text.h1,fontFamily:DS.font.heading,lineHeight:1,letterSpacing:"-0.03em"}}>{byStatus[s]||0}</div>
-              <div style={{width:7,height:7,borderRadius:"50%",background:STATUS_COLORS[s],opacity:0.6}}/>
-            </div>
+          <div key={s} style={{background:"#fff",borderRadius:DS.radius.lg,padding:"16px 18px",border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm,position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:STATUS_COLORS[s]}}/>
+            <div style={{fontSize:28,fontWeight:800,color:DS.text.h1,fontFamily:DS.font.heading,lineHeight:1}}>{byStatus[s]||0}</div>
+            <div style={{fontSize:11,color:DS.text.muted,fontFamily:DS.font.body,marginTop:4}}>{label}</div>
           </div>
         ))}
       </div>
+
+      {/* Real metrics dashboard */}
+      {ps.length>0&&(<div style={{background:"#fff",borderRadius:DS.radius.xl,padding:"20px 24px",marginBottom:20,border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm}}>
+        <div style={{fontSize:14,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading,marginBottom:14}}>📊 Pipeline Metrics</div>
+        <div style={{display:"grid",gridTemplateColumns:isMob?"repeat(2,1fr)":"repeat(3,1fr)",gap:16}}>
+          {(()=>{
+            const now=Date.now();
+            const totalProfiles=ps.length;
+            const activeProfiles=ps.filter(p=>!["closed","filled"].includes(p.status)).length;
+            const filledCount=ps.filter(p=>p.status==="filled").length;
+            const conversionRate=totalProfiles?Math.round((filledCount/totalProfiles)*100):0;
+            const avgAgeDays=ps.length?Math.round(ps.reduce((s,p)=>(now-new Date(p.created_at).getTime())/86400000+s,0)/ps.length):0;
+            const uniqueClients=[...new Set(ps.map(p=>p.client_company).filter(Boolean))].length;
+            const topCategories={};ps.forEach(p=>{topCategories[p.category]=(topCategories[p.category]||0)+1});
+            const topCat=Object.entries(topCategories).sort((a,b)=>b[1]-a[1])[0];
+            const thisMonth=ps.filter(p=>{const d=new Date(p.created_at);const n=new Date();return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()}).length;
+            const lastMonth=ps.filter(p=>{const d=new Date(p.created_at);const n=new Date();n.setMonth(n.getMonth()-1);return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()}).length;
+            const growth=lastMonth?Math.round(((thisMonth-lastMonth)/lastMonth)*100):thisMonth>0?100:0;
+            return[
+              {label:"Total Profiles",value:totalProfiles,sub:`${activeProfiles} active`},
+              {label:"Conversion Rate",value:`${conversionRate}%`,sub:`${filledCount} filled`},
+              {label:"Unique Clients",value:uniqueClients,sub:topCat?`Top: ${topCat[0]}`:"—"},
+              {label:"Avg. Age",value:`${avgAgeDays}d`,sub:"days in pipeline"},
+              {label:"This Month",value:thisMonth,sub:growth>0?`↑ ${growth}% vs last`:growth<0?`↓ ${Math.abs(growth)}% vs last`:"same as last"},
+              {label:"Categories",value:Object.keys(topCategories).length,sub:`${totalProfiles} across all`},
+            ].map((m,i)=>(<div key={i} style={{padding:"12px 0",borderBottom:i<5?`1px solid ${DS.surface.borderLight}`:"none"}}>
+              <div style={{fontSize:10,color:DS.text.faint,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.04em",fontFamily:DS.font.body,marginBottom:3}}>{m.label}</div>
+              <div style={{fontSize:22,fontWeight:800,color:DS.text.h1,fontFamily:DS.font.heading,lineHeight:1}}>{m.value}</div>
+              <div style={{fontSize:10,color:DS.text.muted,fontFamily:DS.font.body,marginTop:2}}>{m.sub}</div>
+            </div>));
+          })()}
+        </div>
+      </div>)}
 
       {/* Filter */}
       <div style={{display:"flex",gap:10,marginBottom:16}}>
@@ -2147,8 +2363,8 @@ function SalesModule({user}){
       </div>
 
       {/* Profiles list */}
-      <div style={{background:"#fff",borderRadius:DS.radius.md,border:`1px solid ${DS.surface.border}`,overflow:"hidden",boxShadow:DS.shadow.card}}>
-        <div style={{padding:"14px 20px",borderBottom:`1px solid ${DS.surface.borderLight}`,fontSize:13,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading,letterSpacing:"-0.01em"}}>Pipeline ({filtered.length})</div>
+      <div style={{background:"#fff",borderRadius:DS.radius.xl,border:`1px solid ${DS.surface.border}`,overflow:"hidden",boxShadow:DS.shadow.sm}}>
+        <div style={{padding:"16px 22px",borderBottom:`1px solid ${DS.surface.borderLight}`,fontSize:14,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading}}>Recruitment Pipeline ({filtered.length})</div>
         {filtered.map((p,i)=>(
           <div key={p.id} style={{padding:"14px 22px",borderBottom:`1px solid ${DS.surface.borderLight}`,display:"flex",justifyContent:"space-between",alignItems:"center",animation:`fadeUp .3s ${i*0.03}s both`}}>
             <div><div style={{fontSize:13,fontWeight:600,color:DS.text.h1,fontFamily:DS.font.heading}}>{p.role} — {p.seniority}</div><div style={{fontSize:12,color:DS.text.muted,fontFamily:DS.font.body,marginTop:2}}>{p.client_name} ({p.client_company})</div></div>
@@ -2169,29 +2385,30 @@ function SalesModule({user}){
 
 // ═══════════ FINANCE MODULE ═══════════
 function FinanceModule({user}){
-  return(<div style={{minHeight:"100vh",background:DS.surface.page,fontFamily:DS.font.body,display:"flex",flexDirection:"column"}}>
-    <div style={{background:DS.brand.navy900,padding:"0",position:"relative",overflow:"hidden"}}>
-      <div style={{maxWidth:900,margin:"0 auto",padding:"16px 24px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative",zIndex:1}}>
-        <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <div style={{width:32,height:32,borderRadius:8,background:"#0EA5E9",display:"flex",alignItems:"center",justifyContent:"center"}}>
-            <span style={{fontSize:13,fontWeight:800,color:"#fff",fontFamily:DS.font.heading}}>B</span>
+  return(<div style={{minHeight:"100vh",background:`linear-gradient(160deg,#F0F9FF,#E0F2FE 30%,${DS.surface.page})`,fontFamily:DS.font.body,display:"flex",flexDirection:"column"}}>
+    <div style={{background:"linear-gradient(135deg,#0C4A6E,#0369A1,#0EA5E9)",padding:"0",position:"relative",overflow:"hidden"}}>
+      <HeaderBG/>
+      <div style={{maxWidth:900,margin:"0 auto",padding:"18px 24px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative",zIndex:1}}>
+        <div style={{display:"flex",alignItems:"center",gap:14}}>
+          <span style={{fontSize:22,fontWeight:800,color:"#fff",letterSpacing:1.5,fontFamily:DS.font.heading}}>BOZ<span style={{color:"#7DD3FC"}}>.</span></span>
+          <div style={{height:20,width:1,background:"rgba(255,255,255,0.15)"}}/>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <div style={{width:30,height:30,borderRadius:DS.radius.md,background:"rgba(255,255,255,0.12)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>💰</div>
+            <span style={{fontSize:12,fontWeight:600,color:"rgba(255,255,255,0.8)",fontFamily:DS.font.heading}}>Finance</span>
           </div>
-          <div><div style={{fontSize:15,fontWeight:800,color:"#fff",letterSpacing:0.5,fontFamily:DS.font.heading}}>BOZ<span style={{color:"#7DD3FC"}}>.</span></div></div>
-          <div style={{height:16,width:1,background:"rgba(255,255,255,0.1)",margin:"0 4px"}}/>
-          <span style={{fontSize:12,fontWeight:600,color:"rgba(125,211,252,0.8)",fontFamily:DS.font.heading}}>Finance</span>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <span style={{fontSize:12,color:"rgba(255,255,255,0.5)",fontFamily:DS.font.body}}>{user.email}</span>
-          <button onClick={signOut} type="button" style={{fontSize:11,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"6px 14px",color:"rgba(255,255,255,0.5)",cursor:"pointer",fontFamily:DS.font.body,transition:"all .15s"}} onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,0.08)"}} onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.04)"}}>Sign Out</button>
+          <span style={{fontSize:12,color:"rgba(255,255,255,0.7)",fontFamily:DS.font.body}}>{user.email}</span>
+          <button onClick={signOut} type="button" style={{fontSize:11,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.15)",borderRadius:DS.radius.md,padding:"7px 14px",color:"rgba(255,255,255,0.7)",cursor:"pointer",fontFamily:DS.font.body}}>Sign Out</button>
         </div>
       </div>
     </div>
     <div style={{maxWidth:900,margin:"0 auto",padding:"48px 24px",flex:1,width:"100%",textAlign:"center"}}>
-      <div style={{width:64,height:64,borderRadius:16,background:"linear-gradient(135deg,#0369A1,#0EA5E9)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 20px",fontSize:28,boxShadow:"0 8px 24px rgba(14,165,233,0.15)",color:"#fff"}}>$</div>
-      <div style={{fontSize:24,fontWeight:800,color:DS.text.h1,fontFamily:DS.font.heading,letterSpacing:"-0.02em"}}>Finance Module</div>
-      <div style={{fontSize:13,color:DS.text.muted,fontFamily:DS.font.body,marginTop:10,maxWidth:420,margin:"10px auto 0",lineHeight:1.6}}>Budget approvals, cost tracking, and financial oversight for the recruitment pipeline.</div>
-      <div style={{display:"inline-flex",alignItems:"center",gap:8,marginTop:20,background:"#fff",padding:"10px 20px",borderRadius:DS.radius.md,fontSize:12,color:"#0369A1",fontFamily:DS.font.heading,fontWeight:600,border:"1px solid #BAE6FD",boxShadow:DS.shadow.card}}>
-        <div style={{width:6,height:6,borderRadius:"50%",background:"#0EA5E9",animation:"pulseGlow 2s infinite"}}/>
+      <div style={{width:80,height:80,borderRadius:"50%",background:"linear-gradient(135deg,#0369A1,#0EA5E9)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px",fontSize:36,boxShadow:"0 8px 32px rgba(14,165,233,0.2)"}}>💰</div>
+      <div style={{fontSize:28,fontWeight:800,color:DS.text.h1,fontFamily:DS.font.heading,letterSpacing:"-0.02em"}}>Finance Module</div>
+      <div style={{fontSize:14,color:DS.text.muted,fontFamily:DS.font.body,marginTop:12,maxWidth:500,margin:"12px auto 0",lineHeight:1.6}}>Budget approvals, cost tracking, and financial oversight for the recruitment pipeline. This module is coming in a future update.</div>
+      <div style={{display:"inline-flex",alignItems:"center",gap:8,marginTop:24,background:"#fff",padding:"12px 24px",borderRadius:DS.radius.pill,fontSize:13,color:"#0369A1",fontFamily:DS.font.heading,fontWeight:600,border:"1.5px solid #BAE6FD",boxShadow:DS.shadow.sm}}>
+        <div style={{width:8,height:8,borderRadius:"50%",background:"#0EA5E9",animation:"pulseGlow 2s infinite"}}/>
         Coming Soon
       </div>
     </div>

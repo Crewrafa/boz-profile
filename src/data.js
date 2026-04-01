@@ -2,7 +2,7 @@
 export const ADMIN_EMAIL="psicologorafaelbaez@gmail.com";
 export const ANA_EMAIL="ana@bozusa.com";
 export const RECRUITER_EMAIL="recruiter@bozusa.com";
-export const APP_VERSION="12.1"; // v12.1 — Visual redesign phase 1
+export const APP_VERSION="12.1"; // v12.1 — AI suggestions + Admin omniscient + Sales metrics
 
 // Role system
 export const VALID_ROLES=["admin","sales","recruiter","ana","finance"];
@@ -93,6 +93,42 @@ RULES:
 
   // Fast-track completion chat
   fast_track:`You help complete missing profile fields. Given current data as JSON, ask about ONE missing field at a time. When user answers, return the update as JSON on its own line, then ask the next question. Say "COMPLETE" when done. Be brief. Respond in user's language.`,
+
+  // Phase 2: Intelligent tech suggestions after JD analysis
+  suggest_completions:`You are a senior IT staffing expert. Given an extracted job profile, identify CRITICAL technical gaps — things that are almost certainly needed but weren't mentioned in the JD.
+
+RULES:
+- Only suggest things that are HIGHLY LIKELY needed based on the role context
+- Max 6 suggestions total
+- Each suggestion must have: category (databases|devops|frameworks|clouds|cloudServices|languages|qaTools|methodology), items (array of specific techs), and reason (1 sentence why)
+- Be specific: don't suggest "a database" — suggest "PostgreSQL" or "MongoDB"
+- Don't suggest things already in the profile
+- If the profile is complete, return empty array
+
+COMMON GAPS BY ROLE TYPE:
+- Backend without databases → suggest relevant DBs (PostgreSQL for enterprise, MongoDB for startups)
+- Any dev role without version control → suggest Git
+- Cloud roles without specific services → suggest key services for that cloud
+- Backend/Fullstack without API frameworks → suggest based on language
+- Any role without CI/CD → suggest GitHub Actions or Jenkins
+- Data roles without Python or SQL → suggest them
+- Frontend without testing → suggest Jest, Cypress
+
+Return ONLY valid JSON: {"suggestions":[{"category":"databases","items":["PostgreSQL","Redis"],"reason":"Backend Java roles typically require relational + caching databases"}]}`,
+
+  // Phase 3: Admin alert detection
+  admin_alerts:`You are a senior IT recruiter reviewing a candidate profile for inconsistencies and red flags. Analyze the profile data and return alerts.
+
+Check for:
+- Seniority vs experience mismatch (e.g. "Senior" with "1-2 years")
+- Missing critical tech for the role type (e.g. backend without databases)
+- Incomplete profiles (many empty fields)
+- Unrealistic combinations (e.g. C-Level with Junior experience)
+- Location/timezone conflicts with engagement type
+- Must-have skills that are very generic or too few
+
+Return ONLY valid JSON: {"alerts":[{"type":"warning|error|info","title":"Short title","detail":"1 sentence explanation"}]}
+If no issues found, return {"alerts":[]}`,
 
   ana_chat:`You are BOZ's soft skills analyst. You ONLY help with soft skills evaluation from client meetings. Redirect any unrelated questions. Respond in user's language.`,
 
