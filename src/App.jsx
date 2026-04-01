@@ -945,7 +945,7 @@ function Admin({user}){
           <div key={i} style={{background:"#fff",borderRadius:DS.radius.lg,padding:"16px 18px",border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm,position:"relative",overflow:"hidden"}}><div style={{position:"absolute",top:0,left:0,right:0,height:3,background:m.c}}/><div style={{fontSize:28,fontWeight:800,color:DS.text.h1,fontFamily:DS.font.heading,lineHeight:1}}>{m.v}</div><div style={{fontSize:11,color:DS.text.muted,fontFamily:DS.font.body,marginTop:4}}>{m.l}</div></div>
         ))}
       </div>}
-      {["kanban","list","pipeline"].includes(view)&&<div style={{display:"grid",gridTemplateColumns:isMob?"repeat(2,1fr)":"repeat(5,1fr)",gap:12,marginBottom:24}}>
+      {["kanban","list"].includes(view)&&<div style={{display:"grid",gridTemplateColumns:isMob?"repeat(2,1fr)":"repeat(5,1fr)",gap:12,marginBottom:24}}>
         {Object.entries(STATUS_LABELS).map(([k,v],idx)=>(<div key={k} style={{background:"#fff",borderRadius:DS.radius.lg,padding:"20px 22px",border:`1px solid ${DS.surface.border}`,cursor:"pointer",transition:`all .25s ${DS.ease.snap}`,boxShadow:DS.shadow.sm,position:"relative",overflow:"hidden",animation:`fadeUp .4s ${idx*0.06}s both`}} onClick={()=>{if(view!=="kanban")setView("kanban")}} onMouseEnter={e=>{e.currentTarget.style.boxShadow=DS.shadow.md;e.currentTarget.style.transform="translateY(-3px)"}} onMouseLeave={e=>{e.currentTarget.style.boxShadow=DS.shadow.sm;e.currentTarget.style.transform="none"}}>
           <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:STATUS_COLORS[k]}}/>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
@@ -955,6 +955,19 @@ function Admin({user}){
           </div>
         </div>))}
       </div>}
+      {view==="pipeline"&&(()=>{
+        const fAssigns=pipeFilter==="all"?allAssigns:allAssigns.filter(a=>a.profile_id===pipeFilter);
+        const stageGroups=[["data_verification","Verification"],["schedule_ts","Sched. TS"],["ready_ts","Ready TS"],["schedule_technical","Sched. Tech"],["ready_technical","Ready Tech"],["schedule_client","Sched. Client"],["ready_client","Ready Client"],["client_approval","Approval"],["hired","Hired"],["discarded","Discarded"]];
+        return(<div style={{display:"flex",gap:8,marginBottom:20,overflowX:"auto",paddingBottom:4}}>
+          {stageGroups.map(([k,l])=>{const cnt=fAssigns.filter(a=>(a.status||"data_verification")===k).length;return(
+            <div key={k} style={{background:"#fff",borderRadius:DS.radius.lg,padding:"12px 14px",border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm,minWidth:90,flexShrink:0,position:"relative",overflow:"hidden"}}>
+              <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:CAND_STAGE_COLORS[k]}}/>
+              <div style={{fontSize:20,fontWeight:800,color:cnt?DS.text.h1:DS.text.placeholder,fontFamily:DS.font.heading,lineHeight:1}}>{cnt}</div>
+              <div style={{fontSize:9,color:DS.text.muted,fontFamily:DS.font.body,marginTop:3,whiteSpace:"nowrap"}}>{l}</div>
+            </div>);
+          })}
+        </div>);
+      })()}
 
       {/* Views */}
       {/* ═══ USERS VIEW (Admin only) ═══ */}
@@ -1872,6 +1885,7 @@ function ClientForm({user}){
   const[aiObjective,setAiObjective]=useState("");const[aiResponsibilities,setAiResponsibilities]=useState([]);const[aiSoftSkills,setAiSoftSkills]=useState([]);
   const[aiGenerating,setAiGenerating]=useState(false);const[aiGenerated,setAiGenerated]=useState(false);
   const[aiSuggestions,setAiSuggestions]=useState([]);const[suggestLoading,setSuggestLoading]=useState(false);const[dismissedSugg,setDismissedSugg]=useState([]);
+  const[selectedSuggItems,setSelectedSuggItems]=useState({}); // {category: [item1, item2]}
 
   useEffect(()=>{getMyProfiles().then(setMyPs).catch(()=>{})},[user.id]);
   const show=(m)=>{setToast(m);setTimeout(()=>setToast(""),3500)};
@@ -1948,21 +1962,34 @@ function ClientForm({user}){
     setDismissedSugg(p=>[...p,sugg.category+(sugg.items||[]).join(",")]);
     show(`✅ Added: ${items.join(", ")}`);
   };
-  // Accept single item from a suggestion
-  const acceptSingleItem=(sugg,item)=>{
-    switch(sugg.category){
-      case"databases":setDbs(p=>[...new Set([...p,item])]);break;
-      case"devops":setDvps(p=>[...new Set([...p,item])]);break;
-      case"frameworks":setFws(p=>[...new Set([...p,item])]);break;
-      case"clouds":setClds(p=>[...new Set([...p,item])]);break;
-      case"cloudServices":setCldSvcs(p=>[...new Set([...p,item])]);break;
-      case"languages":setLangs(p=>[...new Set([...p,item])]);break;
-      case"qaTools":setQas(p=>[...new Set([...p,item])]);break;
-      case"methodology":setMeths(p=>[...new Set([...p,item])]);break;
-      default:break;
-    }
-    setNh(p=>[...new Set([...p,item])]);
-    show(`✅ Added: ${item}`);
+  // Toggle selection of individual suggestion item
+  const toggleSuggItem=(category,item)=>{
+    setSelectedSuggItems(p=>{
+      const curr=p[category]||[];
+      return{...p,[category]:curr.includes(item)?curr.filter(x=>x!==item):[...curr,item]};
+    });
+  };
+  // Add all selected items at once
+  const addSelectedSuggestions=()=>{
+    let added=[];
+    Object.entries(selectedSuggItems).forEach(([cat,items])=>{
+      if(!items.length)return;
+      switch(cat){
+        case"databases":setDbs(p=>[...new Set([...p,...items])]);break;
+        case"devops":setDvps(p=>[...new Set([...p,...items])]);break;
+        case"frameworks":setFws(p=>[...new Set([...p,...items])]);break;
+        case"clouds":setClds(p=>[...new Set([...p,...items])]);break;
+        case"cloudServices":setCldSvcs(p=>[...new Set([...p,...items])]);break;
+        case"languages":setLangs(p=>[...new Set([...p,...items])]);break;
+        case"qaTools":setQas(p=>[...new Set([...p,...items])]);break;
+        case"methodology":setMeths(p=>[...new Set([...p,...items])]);break;
+        default:break;
+      }
+      setNh(p=>[...new Set([...p,...items])]);
+      added.push(...items);
+    });
+    if(added.length){show(`✅ Added ${added.length} technologies: ${added.join(", ")}`);setSelectedSuggItems({});}
+    else show("⚠️ Select at least one technology");
   };
   const dismissSuggestion=(sugg)=>{setDismissedSugg(p=>[...p,sugg.category+(sugg.items||[]).join(",")]);};
 
@@ -2045,7 +2072,7 @@ function ClientForm({user}){
     }
   };
 
-  const handleReset=()=>{setStep(0);setDir(1);setCName("");setCComp("");setUpFile(null);setAnl(null);setUpErr("");setMissingFields([]);setAiSuggestions([]);setSuggestLoading(false);setDismissedSugg([]);setCat("");setRole("");setCRole("");setRSrch("");setSen("");setExp("");setHc(1);setEng("");setSTime("9:00");setETime("17:00");setWHrs(40);setTz("");setLangs([]);setVers({});setFws([]);setFwVers({});setClds([]);setCldSvcs([]);setOtherCloud("");setDbs([]);setDbVers({});setDvps([]);setDvpVers({});setErps([]);setErpVers({});setQas([]);setOTech("");setMh([]);setNh([]);setShowAll(false);setEngl("");setLoc("");setAcad("");setCerts("");setMeths([]);setInds([]);setAiTs([]);setOtherAI("");setProfTools([]);setAiObjective("");setAiResponsibilities([]);setAiSoftSkills([]);setAiGenerated(false);setVisa("");setTravel("");setNotes("");setSDate("");setHolCo("");setHardPct(70);setAk(k=>k+1);setDone(false);setPdfL("")};
+  const handleReset=()=>{setStep(0);setDir(1);setCName("");setCComp("");setUpFile(null);setAnl(null);setUpErr("");setMissingFields([]);setAiSuggestions([]);setSuggestLoading(false);setDismissedSugg([]);setSelectedSuggItems({});setCat("");setRole("");setCRole("");setRSrch("");setSen("");setExp("");setHc(1);setEng("");setSTime("9:00");setETime("17:00");setWHrs(40);setTz("");setLangs([]);setVers({});setFws([]);setFwVers({});setClds([]);setCldSvcs([]);setOtherCloud("");setDbs([]);setDbVers({});setDvps([]);setDvpVers({});setErps([]);setErpVers({});setQas([]);setOTech("");setMh([]);setNh([]);setShowAll(false);setEngl("");setLoc("");setAcad("");setCerts("");setMeths([]);setInds([]);setAiTs([]);setOtherAI("");setProfTools([]);setAiObjective("");setAiResponsibilities([]);setAiSoftSkills([]);setAiGenerated(false);setVisa("");setTravel("");setNotes("");setSDate("");setHolCo("");setHardPct(70);setAk(k=>k+1);setDone(false);setPdfL("")};
 
   const canN=()=>{if(step===0)return cName.trim()&&cComp.trim();if(step===1)return true;if(step===2)return cat&&(role&&role!=="__custom"||cRole.trim());if(step===3)return sen&&exp;return true};
 
@@ -2134,18 +2161,26 @@ function ClientForm({user}){
           </div>
           {suggestLoading&&<div style={{display:"flex",alignItems:"center",gap:10,padding:"14px 0"}}><div style={{width:18,height:18,border:`2.5px solid ${DS.surface.border}`,borderTop:`2.5px solid ${DS.brand.blue700}`,borderRadius:"50%",animation:"spin 1s linear infinite"}}/><span style={{fontSize:12,color:DS.text.muted,fontFamily:DS.font.body}}>Analyzing profile for technical gaps...</span></div>}
           {!suggestLoading&&<div style={{display:"flex",flexDirection:"column",gap:10}}>
-            {aiSuggestions.filter(s=>!dismissedSugg.includes(s.category+(s.items||[]).join(","))).map((s,i)=>(
+            {aiSuggestions.filter(s=>!dismissedSugg.includes(s.category+(s.items||[]).join(","))).map((s,i)=>{
+              const sel=selectedSuggItems[s.category]||[];
+              return(
               <div key={i} style={{padding:"16px 18px",background:`linear-gradient(135deg,${DS.brand.blue50},#fff)`,borderRadius:DS.radius.lg,border:`1px solid rgba(27,111,232,0.08)`,transition:`all .2s ${DS.ease.snap}`}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
                   <div style={{fontSize:10,fontWeight:700,color:DS.brand.blue700,textTransform:"uppercase",letterSpacing:"0.05em",fontFamily:DS.font.body}}>{s.category}</div>
                   <button type="button" onClick={()=>dismissSuggestion(s)} style={{fontSize:10,color:DS.text.faint,background:"none",border:"none",cursor:"pointer",fontFamily:DS.font.body}}>✕ Skip all</button>
                 </div>
-                <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:8}}>{(s.items||[]).map(item=>(
-                  <button key={item} type="button" onClick={()=>acceptSingleItem(s,item)} style={{padding:"5px 14px",borderRadius:DS.radius.pill,fontSize:12,background:"#fff",color:DS.brand.blue700,fontFamily:DS.font.body,fontWeight:600,border:`1.5px solid ${DS.brand.blue100}`,boxShadow:"0 1px 3px rgba(0,0,0,0.04)",cursor:"pointer",transition:`all .2s ${DS.ease.snap}`,display:"flex",alignItems:"center",gap:4}} onMouseEnter={e=>{e.currentTarget.style.background=DS.brand.blue700;e.currentTarget.style.color="#fff";e.currentTarget.style.borderColor=DS.brand.blue700}} onMouseLeave={e=>{e.currentTarget.style.background="#fff";e.currentTarget.style.color=DS.brand.blue700;e.currentTarget.style.borderColor=DS.brand.blue100}}>+ {item}</button>
-                ))}</div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:8}}>{(s.items||[]).map(item=>{
+                  const isSelected=sel.includes(item);
+                  return(<button key={item} type="button" onClick={()=>toggleSuggItem(s.category,item)} style={{padding:"6px 14px",borderRadius:DS.radius.pill,fontSize:12,background:isSelected?DS.brand.blue700:"#fff",color:isSelected?"#fff":DS.brand.blue700,fontFamily:DS.font.body,fontWeight:600,border:`1.5px solid ${isSelected?DS.brand.blue700:DS.brand.blue100}`,boxShadow:isSelected?DS.shadow.blue:"0 1px 3px rgba(0,0,0,0.04)",cursor:"pointer",transition:`all .2s ${DS.ease.snap}`,display:"flex",alignItems:"center",gap:5}}>
+                    <span style={{fontSize:10}}>{isSelected?"✓":"+"}</span>{item}
+                  </button>);
+                })}</div>
                 <div style={{fontSize:11,color:DS.text.muted,fontFamily:DS.font.body,lineHeight:1.5}}>{s.reason}</div>
-              </div>
-            ))}
+              </div>);
+            })}
+            {(()=>{const total=Object.values(selectedSuggItems).reduce((s,a)=>s+a.length,0);return total>0?
+              <button type="button" onClick={addSelectedSuggestions} style={{width:"100%",background:`linear-gradient(135deg,${DS.brand.navy900},${DS.brand.blue700})`,color:"#fff",border:"none",borderRadius:DS.radius.md,padding:14,fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:DS.font.heading,boxShadow:DS.shadow.blue,transition:`all .2s ${DS.ease.snap}`}}>✨ Add {total} Selected Technolog{total===1?"y":"ies"}</button>
+            :null})()}
           </div>}
         </div>
       )}

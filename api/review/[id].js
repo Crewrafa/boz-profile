@@ -64,7 +64,6 @@ export default async function handler(req, res) {
     }
 
     const e = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-    const pd = profile.profile_data || {};
     const html = buildReviewHTML(profile, assignments, docs, pd, e, id);
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.setHeader("Cache-Control", "private, no-cache");
