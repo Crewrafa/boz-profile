@@ -2,7 +2,7 @@
 export const ADMIN_EMAIL="psicologorafaelbaez@gmail.com";
 export const ANA_EMAIL="ana@bozusa.com";
 export const RECRUITER_EMAIL="recruiter@bozusa.com";
-export const APP_VERSION="12.2"; // v12.2 — Soft delete, auto-match, review redesign, client branding
+export const APP_VERSION="12.3"; // v12.3 — Sales redesign, custom modals, smart suggestions, mailto
 
 // Role system
 export const VALID_ROLES=["admin","sales","recruiter","ana","finance"];
@@ -94,27 +94,23 @@ RULES:
   // Fast-track completion chat
   fast_track:`You help complete missing profile fields. Given current data as JSON, ask about ONE missing field at a time. When user answers, return the update as JSON on its own line, then ask the next question. Say "COMPLETE" when done. Be brief. Respond in user's language.`,
 
-  // Phase 2: Intelligent tech suggestions after JD analysis
-  suggest_completions:`You are a senior IT staffing expert. Given an extracted job profile, identify CRITICAL technical gaps — things that are almost certainly needed but weren't mentioned in the JD.
+  // Phase 2: Intelligent tech gap analysis after JD extraction
+  suggest_completions:`You are a senior IT staffing analyst. Given an extracted job profile, identify what CRITICAL categories are MISSING from the profile. Analyze each category independently.
 
 RULES:
-- Only suggest things that are HIGHLY LIKELY needed based on the role context
-- Max 6 suggestions total
-- Each suggestion must have: category (databases|devops|frameworks|clouds|cloudServices|languages|qaTools|methodology), items (array of specific techs), and reason (1 sentence why)
-- Be specific: don't suggest "a database" — suggest "PostgreSQL" or "MongoDB"
-- Don't suggest things already in the profile
-- If the profile is complete, return empty array
+- Analyze what's MISSING, not what's already there
+- Each suggestion is ONE category that's absent or weak
+- Max 6 suggestions
+- For TECHNICAL roles check: databases, devops/CI-CD, cloud services, frameworks/libraries, testing/QA tools, operating systems, version control
+- For NON-TECHNICAL roles check: project management tools (Jira, Asana, Monday), communication platforms, analytics tools, CRM systems, documentation tools, collaboration suites
+- Each suggestion: category name, specific items to add (2-3 max), and a clear explanation of WHY this category matters for this specific role
+- Don't suggest what's already in the profile
+- Be specific to the seniority level and industry
 
-COMMON GAPS BY ROLE TYPE:
-- Backend without databases → suggest relevant DBs (PostgreSQL for enterprise, MongoDB for startups)
-- Any dev role without version control → suggest Git
-- Cloud roles without specific services → suggest key services for that cloud
-- Backend/Fullstack without API frameworks → suggest based on language
-- Any role without CI/CD → suggest GitHub Actions or Jenkins
-- Data roles without Python or SQL → suggest them
-- Frontend without testing → suggest Jest, Cypress
+IMPORTANT: Frame each suggestion as "I don't see [CATEGORY] in this profile. For a [ROLE], you typically need..." 
 
-Return ONLY valid JSON: {"suggestions":[{"category":"databases","items":["PostgreSQL","Redis"],"reason":"Backend Java roles typically require relational + caching databases"}]}`,
+Return ONLY valid JSON: {"suggestions":[{"category":"databases","items":["PostgreSQL","Redis"],"reason":"I don't see any databases in this profile. A Senior Backend Developer with Java typically needs a relational database for data persistence and a caching layer for performance."}]}
+If profile is complete return {"suggestions":[]}`,
 
   // Phase 3: Admin alert detection
   admin_alerts:`You are a senior IT recruiter reviewing a candidate profile for inconsistencies and red flags. Analyze the profile data and return alerts.

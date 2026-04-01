@@ -267,6 +267,9 @@ function Admin({user}){
   const[trashData,setTrashData]=useState({profiles:[],candidates:[]});const[trashLoading,setTrashLoading]=useState(false);
   // Auto-match
   const[autoMatches,setAutoMatches]=useState([]);const[matchLoading,setMatchLoading]=useState(false);
+  // Custom confirm modal (replaces browser confirm())
+  const[confirmModal,setConfirmModal]=useState(null);
+  const showConfirm=(msg,onOk)=>setConfirmModal({msg,onOk});
 
   // Load data
   const load=useCallback(async()=>{
@@ -326,10 +329,10 @@ function Admin({user}){
     }catch(e){show("⚠️ "+e.message)}
   };
   const deleteUser=async(id)=>{
-    if(!confirm("Delete this user permanently?"))return;
+    showConfirm("Delete this user permanently?",async()=>{
     try{await fetch("/api/roles",{method:"POST",headers:ADM_AUTH(),body:JSON.stringify({action:"delete",id})});
       setUsers(p=>p.filter(u=>u.id!==id));show("User deleted");
-    }catch(e){show("⚠️ "+e.message)}
+    }catch(e){show("⚠️ "+e.message)}});
   };
 
   // Load assignments for selected profile
@@ -434,17 +437,17 @@ function Admin({user}){
 
   // ═══ SOFT DELETE ═══
   const softDeleteProfile=async(id)=>{
-    if(!confirm("Move this profile to trash?"))return;
+    showConfirm("Move this profile to trash?",async()=>{
     try{await fetch("/api/admin",{method:"POST",headers:ADM_AUTH(),body:JSON.stringify({action:"soft_delete_profile",id})});
       setPs(p=>p.filter(x=>x.id!==id));if(selP?.id===id){setSelP(null);setView("kanban")}
       show("✅ Profile moved to trash");
-    }catch(e){show("⚠️ "+e.message)}
+    }catch(e){show("⚠️ "+e.message)}});
   };
   const softDeleteCandidate=async(id)=>{
-    if(!confirm("Move this candidate to trash?"))return;
+    showConfirm("Move this candidate to trash?",async()=>{
     try{await fetch("/api/admin",{method:"POST",headers:ADM_AUTH(),body:JSON.stringify({action:"delete_candidate",id})});
       setCands(p=>p.filter(x=>x.id!==id));show("✅ Candidate moved to trash");
-    }catch(e){show("⚠️ "+e.message)}
+    }catch(e){show("⚠️ "+e.message)}});
   };
   const loadTrash=async()=>{
     setTrashLoading(true);
@@ -774,7 +777,6 @@ function Admin({user}){
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}>
             <div style={{fontSize:14,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading}}>Assigned Candidates ({assigns.length})</div>
             <div style={{display:"flex",gap:6}}>
-              <button type="button" onClick={()=>copyReviewLink(selP.id)} style={{fontSize:11,background:"#fff",color:DS.brand.blue700,border:`1.5px solid ${DS.brand.blue700}`,borderRadius:DS.radius.md,padding:"7px 14px",cursor:"pointer",fontFamily:DS.font.heading,fontWeight:600,transition:`all .2s ${DS.ease.snap}`,boxShadow:DS.shadow.sm}} onMouseEnter={e=>{e.currentTarget.style.background=DS.brand.blue700;e.currentTarget.style.color="#fff"}} onMouseLeave={e=>{e.currentTarget.style.background="#fff";e.currentTarget.style.color=DS.brand.blue700}}>🔗 Review Link</button>
               <button type="button" onClick={()=>setShowAddCand(true)} style={{fontSize:12,background:`linear-gradient(135deg,${DS.brand.navy900},${DS.brand.blue700})`,color:"#fff",border:"none",borderRadius:DS.radius.md,padding:"8px 18px",cursor:"pointer",fontFamily:DS.font.heading,fontWeight:600,boxShadow:DS.shadow.blue,transition:`all .2s ${DS.ease.snap}`}}>+ Assign</button>
             </div>
           </div>
@@ -913,8 +915,8 @@ function Admin({user}){
     {/* Main content */}
     <div style={{flex:1,display:"flex",flexDirection:"column",minWidth:0}}>
     <div style={{padding:isMob?"16px":"24px",flex:1,width:"100%",maxWidth:1400,margin:"0 auto"}}>
-      {/* Status metrics */}
-      <div style={{display:"grid",gridTemplateColumns:isMob?"repeat(2,1fr)":"repeat(5,1fr)",gap:12,marginBottom:24}}>
+      {/* Status metrics — only in Board, Dashboard, Pipeline */}
+      {["kanban","list","pipeline"].includes(view)&&<div style={{display:"grid",gridTemplateColumns:isMob?"repeat(2,1fr)":"repeat(5,1fr)",gap:12,marginBottom:24}}>
         {Object.entries(STATUS_LABELS).map(([k,v],idx)=>(<div key={k} style={{background:"#fff",borderRadius:DS.radius.lg,padding:"20px 22px",border:`1px solid ${DS.surface.border}`,cursor:"pointer",transition:`all .25s ${DS.ease.snap}`,boxShadow:DS.shadow.sm,position:"relative",overflow:"hidden",animation:`fadeUp .4s ${idx*0.06}s both`}} onClick={()=>{if(view!=="kanban")setView("kanban")}} onMouseEnter={e=>{e.currentTarget.style.boxShadow=DS.shadow.md;e.currentTarget.style.transform="translateY(-3px)"}} onMouseLeave={e=>{e.currentTarget.style.boxShadow=DS.shadow.sm;e.currentTarget.style.transform="none"}}>
           <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:STATUS_COLORS[k]}}/>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
@@ -923,7 +925,7 @@ function Admin({user}){
             </div>
           </div>
         </div>))}
-      </div>
+      </div>}
 
       {/* Views */}
       {/* ═══ USERS VIEW (Admin only) ═══ */}
@@ -1447,6 +1449,18 @@ function Admin({user}){
           ))}
         </div>}
         {(trashData.profiles.length>0||trashData.candidates.length>0)&&<button type="button" onClick={loadTrash} style={{marginTop:12,fontSize:12,color:DS.text.muted,background:"none",border:`1px solid ${DS.surface.border}`,borderRadius:DS.radius.md,padding:"8px 16px",cursor:"pointer",fontFamily:DS.font.body,width:"100%"}}>↻ Refresh</button>}
+      </div>
+    </div>)}
+
+    {/* Custom confirm modal */}
+    {confirmModal&&(<div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(15,23,42,0.6)",backdropFilter:"blur(4px)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={()=>setConfirmModal(null)}>
+      <div style={{background:"#fff",borderRadius:DS.radius.xxl,padding:"28px 32px",maxWidth:400,width:"100%",animation:"fadeUp .2s both",boxShadow:DS.shadow.lg}} onClick={e=>e.stopPropagation()}>
+        <div style={{fontSize:16,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading,marginBottom:8}}>Confirm Action</div>
+        <div style={{fontSize:14,color:DS.text.body,fontFamily:DS.font.body,lineHeight:1.6,marginBottom:24}}>{confirmModal.msg}</div>
+        <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
+          <button type="button" onClick={()=>setConfirmModal(null)} style={{padding:"10px 20px",fontSize:13,borderRadius:DS.radius.md,border:`1.5px solid ${DS.surface.border}`,background:"#fff",color:DS.text.body,cursor:"pointer",fontFamily:DS.font.heading,fontWeight:500}}>Cancel</button>
+          <button type="button" onClick={()=>{confirmModal.onOk();setConfirmModal(null)}} style={{padding:"10px 24px",fontSize:13,borderRadius:DS.radius.md,border:"none",background:"#dc2626",color:"#fff",cursor:"pointer",fontFamily:DS.font.heading,fontWeight:600,boxShadow:"0 2px 8px rgba(220,38,38,0.25)"}}>Confirm</button>
+        </div>
       </div>
     </div>)}
 
@@ -2336,128 +2350,147 @@ function SalesModule({user}){
   const[ps,setPs]=useState([]);const[ld,setLd]=useState(true);
   const[toast,setToast]=useState("");const[linkCopied,setLinkCopied]=useState(false);
   const[inviteEmail,setInviteEmail]=useState("");const[filterSales,setFilterSales]=useState("all");
+  const[salesView,setSalesView]=useState("overview");
   const isMob=useW()<640;
   const show=(m)=>{setToast(m);setTimeout(()=>setToast(""),3500)};
   const clientLink=`${window.location.origin}`;
 
   useEffect(()=>{
     (async()=>{try{
-      // Sales uses client API to see all profiles
       const r=await fetch("/api/admin",{headers:{"Authorization":`Bearer ${localStorage.getItem("sb-access-token")}`,"Content-Type":"application/json"}});
       if(r.ok){const d=await r.json();if(Array.isArray(d))setPs(d)}
     }catch(e){console.warn("Sales load:",e)}finally{setLd(false)}})();
   },[]);
 
   const copyLink=()=>{navigator.clipboard.writeText(clientLink).then(()=>{setLinkCopied(true);setTimeout(()=>setLinkCopied(false),2000);show("✅ Link copied!")}).catch(()=>show("⚠️ Copy failed"))};
+  // Open email client with pre-written invite
   const sendInvite=()=>{if(!inviteEmail.includes("@"))return show("⚠️ Enter valid email");
-    // For now, just copy link — real email sending would use EmailJS or similar
-    navigator.clipboard.writeText(`${clientLink}`);show(`✅ Link copied for ${inviteEmail}`);setInviteEmail("")};
+    const subject=encodeURIComponent("BOZ IT Staffing — Define Your Ideal Tech Talent");
+    const body=encodeURIComponent(`Hi,\n\nI'd like to invite you to submit your staffing requirements through our Verified Fit platform.\n\nClick here to get started:\n${clientLink}\n\nThe process takes about 5 minutes and our AI will help you define the perfect tech profile.\n\nBest regards,\n${user.email?.split("@")[0]||"BOZ Team"}\nBOZ IT Staffing`);
+    window.open(`mailto:${inviteEmail}?subject=${subject}&body=${body}`,"_self");
+    show(`✅ Email opened for ${inviteEmail}`);setInviteEmail("")};
 
   const clients=[...new Set(ps.map(p=>p.client_company).filter(Boolean))];
   const filtered=filterSales==="all"?ps:ps.filter(p=>p.client_company===filterSales);
   const byStatus={};Object.keys(STATUS_LABELS).forEach(s=>{byStatus[s]=filtered.filter(p=>p.status===s).length});
 
+  // Computed metrics
+  const now=Date.now();
+  const totalProfiles=ps.length;const activeProfiles=ps.filter(p=>!["closed","filled"].includes(p.status)).length;
+  const filledCount=ps.filter(p=>p.status==="filled").length;
+  const conversionRate=totalProfiles?Math.round((filledCount/totalProfiles)*100):0;
+  const avgAgeDays=ps.length?Math.round(ps.reduce((s,p)=>(now-new Date(p.created_at).getTime())/86400000+s,0)/ps.length):0;
+  const uniqueClients=[...new Set(ps.map(p=>p.client_company).filter(Boolean))].length;
+  const thisMonth=ps.filter(p=>{const d=new Date(p.created_at);const n=new Date();return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()}).length;
+
   if(ld)return<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:DS.surface.page}}><Spinner text="Loading..."/></div>;
 
-  return(<div style={{minHeight:"100vh",background:`linear-gradient(160deg,#ECFDF5,#D1FAE5 30%,${DS.surface.page})`,fontFamily:DS.font.body,display:"flex",flexDirection:"column"}}>
-    {toast&&<div style={{position:"fixed",top:20,left:"50%",transform:"translateX(-50%)",zIndex:100,background:toast.includes("⚠️")?"#dc2626":"#059669",color:"#fff",padding:"12px 28px",borderRadius:DS.radius.lg,fontSize:13,fontWeight:500,boxShadow:DS.shadow.lg,animation:"fadeUp .3s both"}}>{toast}</div>}
-    <div style={{background:"linear-gradient(135deg,#064E3B,#059669,#10b981)",padding:"0",position:"relative",overflow:"hidden"}}>
-      <HeaderBG/>
-      <div style={{maxWidth:1000,margin:"0 auto",padding:"18px 24px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative",zIndex:1}}>
+  return(<div style={{minHeight:"100vh",background:DS.surface.page,fontFamily:DS.font.body,display:"flex",flexDirection:"column"}}>
+    {toast&&<div style={{position:"fixed",top:20,left:"50%",transform:"translateX(-50%)",zIndex:100,background:toast.includes("⚠️")?"#dc2626":DS.brand.navy900,color:"#fff",padding:"12px 28px",borderRadius:DS.radius.lg,fontSize:13,fontWeight:500,boxShadow:DS.shadow.lg,animation:"fadeUp .3s both"}}>{toast}</div>}
+
+    {/* Header */}
+    <div style={{background:DS.brand.navy900,padding:"0",position:"relative",overflow:"hidden"}}>
+      <div style={{maxWidth:1100,margin:"0 auto",padding:"16px 24px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative",zIndex:1}}>
         <div style={{display:"flex",alignItems:"center",gap:14}}>
           <span style={{fontSize:22,fontWeight:800,color:"#fff",letterSpacing:1.5,fontFamily:DS.font.heading}}>BOZ<span style={{color:"#6EE7B7"}}>.</span></span>
-          <div style={{height:20,width:1,background:"rgba(255,255,255,0.15)"}}/>
-          <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <div style={{width:30,height:30,borderRadius:DS.radius.md,background:"rgba(255,255,255,0.12)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>💼</div>
-            <span style={{fontSize:12,fontWeight:600,color:"rgba(255,255,255,0.8)",fontFamily:DS.font.heading}}>Sales</span>
-          </div>
+          <div style={{height:20,width:1,background:"rgba(255,255,255,0.1)"}}/>
+          <span style={{fontSize:13,fontWeight:600,color:"rgba(110,231,183,0.8)",fontFamily:DS.font.heading}}>Sales Dashboard</span>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <span style={{fontSize:12,color:"rgba(255,255,255,0.7)",fontFamily:DS.font.body}}>{user.email}</span>
-          <button onClick={signOut} type="button" style={{fontSize:11,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.15)",borderRadius:DS.radius.md,padding:"7px 14px",color:"rgba(255,255,255,0.7)",cursor:"pointer",fontFamily:DS.font.body}}>Sign Out</button>
+          <span style={{fontSize:12,color:"rgba(255,255,255,0.5)",fontFamily:DS.font.body}}>{user.email}</span>
+          <button onClick={signOut} type="button" style={{fontSize:11,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:DS.radius.md,padding:"7px 14px",color:"rgba(255,255,255,0.5)",cursor:"pointer",fontFamily:DS.font.body}}>Sign Out</button>
         </div>
       </div>
     </div>
-    <div style={{maxWidth:1000,margin:"0 auto",padding:"24px",flex:1,width:"100%"}}>
-      {/* Send link card */}
-      <div style={{background:"#fff",borderRadius:DS.radius.xl,padding:"24px 28px",marginBottom:20,border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm}}>
-        <div style={{fontSize:16,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading,marginBottom:4}}>Send Profile Request to Client</div>
-        <div style={{fontSize:12,color:DS.text.muted,fontFamily:DS.font.body,marginBottom:16}}>Share this link so clients can fill out their staffing requirements</div>
-        <div style={{display:"flex",gap:10,marginBottom:12,flexWrap:"wrap"}}>
-          <div style={{flex:1,minWidth:200,background:DS.surface.sunken,borderRadius:DS.radius.md,padding:"12px 16px",fontSize:13,color:DS.text.body,fontFamily:"monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",border:`1px solid ${DS.surface.border}`}}>{clientLink}</div>
-          <button type="button" onClick={copyLink} style={{background:linkCopied?"#059669":`linear-gradient(135deg,#064E3B,#059669)`,color:"#fff",border:"none",borderRadius:DS.radius.md,padding:"12px 24px",fontSize:13,fontWeight:600,fontFamily:DS.font.heading,cursor:"pointer",transition:"all .2s",boxShadow:"0 4px 12px rgba(5,150,105,0.2)"}}>{linkCopied?"✓ Copied!":"📋 Copy Link"}</button>
-        </div>
-        <div style={{display:"flex",gap:8,alignItems:"center"}}>
-          <input type="email" value={inviteEmail} onChange={e=>setInviteEmail(e.target.value)} placeholder="client@company.com" style={{flex:1,border:`1.5px solid ${DS.surface.border}`,borderRadius:DS.radius.sm,padding:"10px 14px",fontSize:13,fontFamily:DS.font.body,outline:"none"}}/>
-          <button type="button" onClick={sendInvite} style={{background:"#fff",color:"#059669",border:"1.5px solid #059669",borderRadius:DS.radius.md,padding:"10px 20px",fontSize:12,fontWeight:600,fontFamily:DS.font.heading,cursor:"pointer"}}>📧 Send Invite</button>
-        </div>
-      </div>
 
-      {/* Status overview */}
-      <div style={{display:"grid",gridTemplateColumns:isMob?"repeat(2,1fr)":"repeat(4,1fr)",gap:10,marginBottom:20}}>
-        {[["new","New Requests"],["pending_review","In Review"],["pending_soft","Talent Discovery"],["filled","Filled"]].map(([s,label])=>(
-          <div key={s} style={{background:"#fff",borderRadius:DS.radius.lg,padding:"16px 18px",border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm,position:"relative",overflow:"hidden"}}>
-            <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:STATUS_COLORS[s]}}/>
-            <div style={{fontSize:28,fontWeight:800,color:DS.text.h1,fontFamily:DS.font.heading,lineHeight:1}}>{byStatus[s]||0}</div>
-            <div style={{fontSize:11,color:DS.text.muted,fontFamily:DS.font.body,marginTop:4}}>{label}</div>
+    <div style={{maxWidth:1100,margin:"0 auto",padding:"24px",flex:1,width:"100%"}}>
+
+      {/* KPI Strip */}
+      <div style={{display:"grid",gridTemplateColumns:isMob?"repeat(2,1fr)":"repeat(6,1fr)",gap:10,marginBottom:24}}>
+        {[
+          {label:"Total",value:totalProfiles,color:"#1B6FE8"},
+          {label:"Active",value:activeProfiles,color:"#f59e0b"},
+          {label:"Filled",value:filledCount,color:"#059669"},
+          {label:"Conversion",value:`${conversionRate}%`,color:conversionRate>=50?"#059669":"#f59e0b"},
+          {label:"Clients",value:uniqueClients,color:"#8b5cf6"},
+          {label:"This Month",value:thisMonth,color:"#0369a1"},
+        ].map((kpi,i)=>(
+          <div key={i} style={{background:"#fff",borderRadius:DS.radius.lg,padding:"18px 16px",border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm,animation:`fadeUp .3s ${i*0.05}s both`}}>
+            <div style={{fontSize:10,color:DS.text.faint,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.05em",fontFamily:DS.font.body}}>{kpi.label}</div>
+            <div style={{fontSize:26,fontWeight:800,color:kpi.color,fontFamily:DS.font.heading,lineHeight:1,marginTop:6}}>{kpi.value}</div>
           </div>
         ))}
       </div>
 
-      {/* Real metrics dashboard */}
-      {ps.length>0&&(<div style={{background:"#fff",borderRadius:DS.radius.xl,padding:"20px 24px",marginBottom:20,border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm}}>
-        <div style={{fontSize:14,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading,marginBottom:14}}>📊 Pipeline Metrics</div>
-        <div style={{display:"grid",gridTemplateColumns:isMob?"repeat(2,1fr)":"repeat(3,1fr)",gap:16}}>
-          {(()=>{
-            const now=Date.now();
-            const totalProfiles=ps.length;
-            const activeProfiles=ps.filter(p=>!["closed","filled"].includes(p.status)).length;
-            const filledCount=ps.filter(p=>p.status==="filled").length;
-            const conversionRate=totalProfiles?Math.round((filledCount/totalProfiles)*100):0;
-            const avgAgeDays=ps.length?Math.round(ps.reduce((s,p)=>(now-new Date(p.created_at).getTime())/86400000+s,0)/ps.length):0;
-            const uniqueClients=[...new Set(ps.map(p=>p.client_company).filter(Boolean))].length;
-            const topCategories={};ps.forEach(p=>{topCategories[p.category]=(topCategories[p.category]||0)+1});
-            const topCat=Object.entries(topCategories).sort((a,b)=>b[1]-a[1])[0];
-            const thisMonth=ps.filter(p=>{const d=new Date(p.created_at);const n=new Date();return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()}).length;
-            const lastMonth=ps.filter(p=>{const d=new Date(p.created_at);const n=new Date();n.setMonth(n.getMonth()-1);return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()}).length;
-            const growth=lastMonth?Math.round(((thisMonth-lastMonth)/lastMonth)*100):thisMonth>0?100:0;
-            return[
-              {label:"Total Profiles",value:totalProfiles,sub:`${activeProfiles} active`},
-              {label:"Conversion Rate",value:`${conversionRate}%`,sub:`${filledCount} filled`},
-              {label:"Unique Clients",value:uniqueClients,sub:topCat?`Top: ${topCat[0]}`:"—"},
-              {label:"Avg. Age",value:`${avgAgeDays}d`,sub:"days in pipeline"},
-              {label:"This Month",value:thisMonth,sub:growth>0?`↑ ${growth}% vs last`:growth<0?`↓ ${Math.abs(growth)}% vs last`:"same as last"},
-              {label:"Categories",value:Object.keys(topCategories).length,sub:`${totalProfiles} across all`},
-            ].map((m,i)=>(<div key={i} style={{padding:"12px 0",borderBottom:i<5?`1px solid ${DS.surface.borderLight}`:"none"}}>
-              <div style={{fontSize:10,color:DS.text.faint,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.04em",fontFamily:DS.font.body,marginBottom:3}}>{m.label}</div>
-              <div style={{fontSize:22,fontWeight:800,color:DS.text.h1,fontFamily:DS.font.heading,lineHeight:1}}>{m.value}</div>
-              <div style={{fontSize:10,color:DS.text.muted,fontFamily:DS.font.body,marginTop:2}}>{m.sub}</div>
-            </div>));
-          })()}
-        </div>
-      </div>)}
+      <div style={{display:"grid",gridTemplateColumns:isMob?"1fr":"340px 1fr",gap:20}}>
 
-      {/* Filter */}
-      <div style={{display:"flex",gap:10,marginBottom:16}}>
-        <select value={filterSales} onChange={e=>setFilterSales(e.target.value)} style={{fontSize:12,border:`1.5px solid ${DS.surface.border}`,borderRadius:DS.radius.sm,padding:"8px 12px",fontFamily:DS.font.body,background:"#fff",cursor:"pointer"}}>
-          <option value="all">All clients ({ps.length})</option>
-          {clients.map(c=><option key={c} value={c}>{c}</option>)}
-        </select>
-      </div>
-
-      {/* Profiles list */}
-      <div style={{background:"#fff",borderRadius:DS.radius.xl,border:`1px solid ${DS.surface.border}`,overflow:"hidden",boxShadow:DS.shadow.sm}}>
-        <div style={{padding:"16px 22px",borderBottom:`1px solid ${DS.surface.borderLight}`,fontSize:14,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading}}>Recruitment Pipeline ({filtered.length})</div>
-        {filtered.map((p,i)=>(
-          <div key={p.id} style={{padding:"14px 22px",borderBottom:`1px solid ${DS.surface.borderLight}`,display:"flex",justifyContent:"space-between",alignItems:"center",animation:`fadeUp .3s ${i*0.03}s both`}}>
-            <div><div style={{fontSize:13,fontWeight:600,color:DS.text.h1,fontFamily:DS.font.heading}}>{p.role} — {p.seniority}</div><div style={{fontSize:12,color:DS.text.muted,fontFamily:DS.font.body,marginTop:2}}>{p.client_name} ({p.client_company})</div></div>
-            <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <span style={{fontSize:10,fontWeight:600,color:STATUS_COLORS[p.status],background:`${STATUS_COLORS[p.status]}15`,padding:"4px 12px",borderRadius:DS.radius.pill}}>{STATUS_LABELS[p.status]}</span>
-              <div style={{fontSize:10,color:DS.text.faint}}>{new Date(p.created_at).toLocaleDateString()}</div>
+        {/* Left Column — Actions */}
+        <div>
+          {/* Invite Client */}
+          <div style={{background:"#fff",borderRadius:DS.radius.xl,padding:"22px 24px",marginBottom:16,border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm}}>
+            <div style={{fontSize:15,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading,marginBottom:2}}>Invite Client</div>
+            <div style={{fontSize:11,color:DS.text.muted,fontFamily:DS.font.body,marginBottom:14}}>Send the intake link to a new client via email</div>
+            <input type="email" value={inviteEmail} onChange={e=>setInviteEmail(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")sendInvite()}} placeholder="client@company.com" style={{width:"100%",border:`1.5px solid ${DS.surface.border}`,borderRadius:DS.radius.md,padding:"11px 14px",fontSize:13,fontFamily:DS.font.body,outline:"none",marginBottom:10}} onFocus={e=>{e.target.style.borderColor="#059669"}} onBlur={e=>{e.target.style.borderColor=DS.surface.border}}/>
+            <button type="button" onClick={sendInvite} style={{width:"100%",background:"linear-gradient(135deg,#064E3B,#059669)",color:"#fff",border:"none",borderRadius:DS.radius.md,padding:"12px",fontSize:13,fontWeight:600,fontFamily:DS.font.heading,cursor:"pointer",boxShadow:"0 4px 12px rgba(5,150,105,0.2)",marginBottom:8}}>📧 Send via Email</button>
+            <div style={{display:"flex",gap:6}}>
+              <button type="button" onClick={copyLink} style={{flex:1,background:linkCopied?"#059669":"#fff",color:linkCopied?"#fff":DS.text.body,border:`1.5px solid ${linkCopied?"#059669":DS.surface.border}`,borderRadius:DS.radius.md,padding:"9px",fontSize:11,fontWeight:500,fontFamily:DS.font.body,cursor:"pointer",transition:"all .2s"}}>{linkCopied?"✓ Copied":"Copy Link"}</button>
             </div>
+            <div style={{marginTop:10,padding:"8px 12px",background:DS.surface.sunken,borderRadius:DS.radius.sm,fontSize:10,color:DS.text.faint,fontFamily:"monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{clientLink}</div>
           </div>
-        ))}
-        {!filtered.length&&<div style={{textAlign:"center",padding:48,color:DS.text.faint,fontFamily:DS.font.body}}><div style={{fontSize:36,marginBottom:10}}>📋</div>No profiles yet. Send the link to your first client!</div>}
+
+          {/* Client filter */}
+          <div style={{background:"#fff",borderRadius:DS.radius.xl,padding:"18px 20px",marginBottom:16,border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm}}>
+            <div style={{fontSize:12,fontWeight:700,color:DS.text.h2,fontFamily:DS.font.heading,marginBottom:10}}>Filter by Client</div>
+            <select value={filterSales} onChange={e=>setFilterSales(e.target.value)} style={{width:"100%",fontSize:12,border:`1.5px solid ${DS.surface.border}`,borderRadius:DS.radius.md,padding:"10px 12px",fontFamily:DS.font.body,background:"#fff",cursor:"pointer"}}>
+              <option value="all">All clients ({ps.length})</option>
+              {clients.map(c=><option key={c} value={c}>{c} ({ps.filter(p=>p.client_company===c).length})</option>)}
+            </select>
+          </div>
+
+          {/* Status breakdown */}
+          <div style={{background:"#fff",borderRadius:DS.radius.xl,padding:"18px 20px",border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm}}>
+            <div style={{fontSize:12,fontWeight:700,color:DS.text.h2,fontFamily:DS.font.heading,marginBottom:12}}>Pipeline Status</div>
+            {Object.entries(STATUS_LABELS).map(([k,v])=>{const cnt=byStatus[k]||0;const pct=totalProfiles?Math.round((cnt/totalProfiles)*100):0;return(
+              <div key={k} style={{marginBottom:8}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                  <span style={{fontSize:11,color:DS.text.body,fontFamily:DS.font.body}}>{v}</span>
+                  <span style={{fontSize:11,fontWeight:700,color:STATUS_COLORS[k],fontFamily:DS.font.heading}}>{cnt}</span>
+                </div>
+                <div style={{height:4,background:DS.surface.sunken,borderRadius:2,overflow:"hidden"}}>
+                  <div style={{height:"100%",width:`${pct}%`,background:STATUS_COLORS[k],borderRadius:2,transition:"width .5s"}}/>
+                </div>
+              </div>
+            )})}
+          </div>
+        </div>
+
+        {/* Right Column — Pipeline */}
+        <div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+            <div style={{fontSize:17,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading}}>Pipeline ({filtered.length})</div>
+            <div style={{fontSize:11,color:DS.text.faint,fontFamily:DS.font.body}}>Avg. {avgAgeDays} days in pipeline</div>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {filtered.map((p,i)=>{
+              const age=Math.round((now-new Date(p.created_at).getTime())/86400000);
+              return(
+              <div key={p.id} style={{background:"#fff",borderRadius:DS.radius.lg,padding:"16px 20px",border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm,display:"flex",justifyContent:"space-between",alignItems:"center",transition:`all .2s ${DS.ease.snap}`,animation:`fadeUp .3s ${i*0.03}s both`,cursor:"default"}} onMouseEnter={e=>{e.currentTarget.style.borderColor=STATUS_COLORS[p.status];e.currentTarget.style.boxShadow=DS.shadow.md}} onMouseLeave={e=>{e.currentTarget.style.borderColor=DS.surface.border;e.currentTarget.style.boxShadow=DS.shadow.sm}}>
+                <div style={{flex:1}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <div style={{fontSize:14,fontWeight:600,color:DS.text.h1,fontFamily:DS.font.heading}}>{p.role}</div>
+                    <span style={{fontSize:10,fontWeight:600,color:STATUS_COLORS[p.status],background:`${STATUS_COLORS[p.status]}12`,padding:"2px 10px",borderRadius:DS.radius.pill,fontFamily:DS.font.body}}>{STATUS_LABELS[p.status]}</span>
+                  </div>
+                  <div style={{fontSize:12,color:DS.text.muted,fontFamily:DS.font.body,marginTop:3}}>{p.client_name} · {p.client_company} · {p.seniority}</div>
+                </div>
+                <div style={{textAlign:"right",flexShrink:0,marginLeft:12}}>
+                  <div style={{fontSize:10,color:DS.text.faint,fontFamily:DS.font.body}}>{age}d ago</div>
+                  <div style={{fontSize:9,color:DS.text.placeholder,marginTop:2}}>{p.category}</div>
+                </div>
+              </div>);
+            })}
+            {!filtered.length&&<div style={{textAlign:"center",padding:48,color:DS.text.faint,fontFamily:DS.font.body,background:"#fff",borderRadius:DS.radius.xl,border:`1px solid ${DS.surface.border}`}}><div style={{fontSize:36,marginBottom:10}}>📋</div>No profiles yet. Invite your first client!</div>}
+          </div>
+        </div>
       </div>
     </div>
     <Footer/>
