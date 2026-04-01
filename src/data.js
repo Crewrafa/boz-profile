@@ -2,7 +2,7 @@
 export const ADMIN_EMAIL="psicologorafaelbaez@gmail.com";
 export const ANA_EMAIL="ana@bozusa.com";
 export const RECRUITER_EMAIL="recruiter@bozusa.com";
-export const APP_VERSION="13"; // v13 — Sales 3-tab, recruiter theming, review lock, talent filters
+export const APP_VERSION="13.1"; // v13.1 — Password login, rate limit, finance per profile, sales fix
 
 // Role system
 export const VALID_ROLES=["admin","sales","recruiter","ana","finance"];
@@ -100,16 +100,25 @@ RULES:
 RULES:
 - Analyze what's MISSING, not what's already there
 - Each suggestion is ONE category that's absent or weak
-- Max 6 suggestions
-- For TECHNICAL roles check: databases, devops/CI-CD, cloud services, frameworks/libraries, testing/QA tools, operating systems, version control
-- For NON-TECHNICAL roles check: project management tools (Jira, Asana, Monday), communication platforms, analytics tools, CRM systems, documentation tools, collaboration suites
-- Each suggestion: category name, specific items to add (2-3 max), and a clear explanation of WHY this category matters for this specific role
+- Max 8 suggestions, 2-4 items per suggestion
+- For TECHNICAL roles check: databases, devops/CI-CD, cloud services, frameworks/libraries, testing/QA tools, monitoring/observability, message queues, API tools
+- For NON-TECHNICAL roles check: project management (Jira, Asana, Monday, Trello), communication (Slack, Teams, Zoom), analytics (Tableau, Power BI, Looker, GA4), CRM (Salesforce, HubSpot, Pipedrive), documentation (Confluence, Notion, SharePoint), design (Figma, Adobe XD)
+- Include version hints: e.g. "PostgreSQL 15+" or "Java 17+" or "React 18+"
 - Don't suggest what's already in the profile
-- Be specific to the seniority level and industry
 
-IMPORTANT: Frame each suggestion as "I don't see [CATEGORY] in this profile. For a [ROLE], you typically need..." 
+EXPANDED TECH KNOWLEDGE:
+- Backend: Spring Boot 3, Django 5, FastAPI, Express, NestJS, Laravel, Rails 7, ASP.NET Core 8
+- Frontend: React 18, Angular 17, Vue 3, Next.js 14, Nuxt 3, Svelte, Remix
+- Databases: PostgreSQL 15+, MySQL 8+, MongoDB 7+, Redis 7+, DynamoDB, Cassandra, Neo4j, ClickHouse
+- DevOps: Docker, Kubernetes 1.28+, Terraform, Ansible, ArgoCD, GitHub Actions, GitLab CI, Jenkins
+- Cloud: AWS (EC2, S3, Lambda, RDS, ECS/EKS, SQS), Azure (App Service, AKS, Functions, CosmosDB), GCP (GKE, Cloud Run, BigQuery)
+- Monitoring: Datadog, Grafana, Prometheus, New Relic, Sentry, ELK Stack
+- Testing: Jest, Cypress, Playwright, JUnit 5, pytest, Vitest
+- Message Queues: RabbitMQ, Kafka, SQS, Redis Pub/Sub
 
-Return ONLY valid JSON: {"suggestions":[{"category":"databases","items":["PostgreSQL","Redis"],"reason":"I don't see any databases in this profile. A Senior Backend Developer with Java typically needs a relational database for data persistence and a caching layer for performance."}]}
+IMPORTANT: Frame each suggestion as "I don't see [CATEGORY] in this profile. For a [ROLE], you typically need..."
+
+Return ONLY valid JSON: {"suggestions":[{"category":"databases","items":["PostgreSQL 15+","Redis 7+"],"reason":"I don't see any databases. A Senior Backend Developer with Java needs PostgreSQL for relational data and Redis for caching."}]}
 If profile is complete return {"suggestions":[]}`,
 
   // Phase 3: Admin alert detection
@@ -304,7 +313,7 @@ export const STEP_INFO={
   "Review":"🚀 Final check! Review your entire profile request, see the completeness score, adjust the skills balance, and submit. You'll get a professional PDF document and we'll start sourcing immediately.",
 };
 
-export const STATUS_LABELS={new:"New",pending_review:"Pending Review",pending_soft:"Pending Soft Skills",in_progress:"In Progress",sourcing:"Sourcing",filled:"Filled",closed:"Closed"};
+export const STATUS_LABELS={new:"New",pending_review:"Pending Review",pending_soft:"Pending Soft Skills",in_progress:"In Progress",sourcing:"Sourcing",filled:"Ready for Client",closed:"Closed"};
 export const STATUS_COLORS={new:"#3b82f6",pending_review:"#f97316",pending_soft:"#8b5cf6",in_progress:"#f59e0b",sourcing:"#06b6d4",filled:"#10b981",closed:"#64748b"};
 
 // ═══════════ HELPERS ═══════════

@@ -1,5 +1,36 @@
 // BOZ Admin API — profiles, candidates, assignments
 // Accessible by: admin + recruiter roles
+// Security: rate limiting, input sanitization, auth verification
+
+// ═══ RATE LIMITING (in-memory per instance) ═══
+const rateLimitStore = {};
+function checkRateLimit(ip, endpoint, maxReq = 60, windowMs = 60000) {
+  const key = `${ip}:${endpoint}`;
+  const now = Date.now();
+  if (!rateLimitStore[key] || now - rateLimitStore[key].start > windowMs) {
+    rateLimitStore[key] = { count: 1, start: now };
+    return true;
+  }
+  rateLimitStore[key].count++;
+  return rateLimitStore[key].count <= maxReq;
+}
+
+// ═══ INPUT SANITIZATION ═══
+function sanitize(str) {
+  if (typeof str !== "string") return str;
+  return str.replace(/[<>'"`;\\]/g, "").replace(/javascript:/gi, "").replace(/on\w+=/gi, "").trim().substring(0, 5000);
+}
+function sanitizeObj(obj) {
+  if (!obj || typeof obj !== "object") return obj;
+  const clean = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (typeof v === "string") clean[k] = sanitize(v);
+    else if (Array.isArray(v)) clean[k] = v.map(i => typeof i === "string" ? sanitize(i) : i);
+    else if (typeof v === "object" && v !== null) clean[k] = sanitizeObj(v);
+    else clean[k] = v;
+  }
+  return clean;
+}
 
 async function verifyAccess(req, url, key) {
   const token = (req.headers.authorization || "").replace("Bearer ", "");
@@ -29,6 +60,13 @@ export default async function handler(req, res) {
 
   const admin = await verifyAccess(req, url, key);
   if (!admin) return res.status(403).json({ error: "Unauthorized" });
+
+  // Rate limit check
+  const clientIP = req.headers["x-forwarded-for"]?.split(",")[0] || req.headers["x-real-ip"] || "unknown";
+  if (!checkRateLimit(clientIP, "admin", 120, 60000)) return res.status(429).json({ error: "Too many requests. Please wait." });
+
+  // Sanitize body
+  if (req.body && typeof req.body === "object") req.body = sanitizeObj(req.body);
 
   const H = { "apikey": key, "Authorization": `Bearer ${key}`, "Content-Type": "application/json" };
   const action = req.query.action || req.body?.action;
@@ -309,6 +347,43 @@ export default async function handler(req, res) {
       await fetch(`${url}/rest/v1/profiles?id=eq.${profile_id}`, { method: "PATCH", headers: { ...H, "Prefer": "return=minimal" }, body: JSON.stringify({ profile_data: pd }) });
       await fetch(`${url}/rest/v1/audit_log`, { method: "POST", headers: H, body: JSON.stringify({ action: authorized !== false ? "authorize_review" : "revoke_review", table_name: "profiles", record_id: profile_id, performed_by: admin.email, details: {} }) });
       return res.status(200).json({ ok: true });
+    }
+
+    // ═══ FINANCE PRICING ═══
+    if (action === "get_pricing") {
+      const { profile_id } = req.body;
+      if (profile_id) {
+        const r = await fetch(`${url}/rest/v1/finance_pricing?profile_id=eq.${profile_id}&order=created_at.desc&limit=1`, { headers: H });
+        return res.status(200).json(r.ok ? (await r.json())[0] || null : null);
+      }
+      const r = await fetch(`${url}/rest/v1/finance_pricing?order=created_at.desc`, { headers: H });
+      return res.status(200).json(r.ok ? await r.json() : []);
+    }
+
+    if (action === "save_pricing") {
+      const { profile_id, client_rate, rockstar_salary, resources, contract_months, vacation_days, holiday_country, notes } = req.body;
+      if (!profile_id) return res.status(400).json({ error: "profile_id required" });
+      // Upsert: check if exists
+      const eR = await fetch(`${url}/rest/v1/finance_pricing?profile_id=eq.${profile_id}&limit=1`, { headers: H });
+      const existing = (await eR.json())[0];
+      const data = { profile_id, client_rate: client_rate || 0, rockstar_salary: rockstar_salary || 0, resources: resources || 1, contract_months: contract_months || 12, vacation_days: vacation_days ?? 10, holiday_country: holiday_country || "Mexico", notes: notes || "", updated_at: new Date().toISOString() };
+      if (existing) {
+        await fetch(`${url}/rest/v1/finance_pricing?id=eq.${existing.id}`, { method: "PATCH", headers: { ...H, "Prefer": "return=minimal" }, body: JSON.stringify(data) });
+      } else {
+        await fetch(`${url}/rest/v1/finance_pricing`, { method: "POST", headers: { ...H, "Prefer": "return=minimal" }, body: JSON.stringify(data) });
+      }
+      return res.status(200).json({ ok: true });
+    }
+
+    if (action === "list_all_pricing") {
+      if (admin.role !== "admin" && admin.role !== "finance") return res.status(403).json({ error: "Admin/Finance only" });
+      const [pR, fR] = await Promise.all([
+        fetch(`${url}/rest/v1/profiles?deleted_at=is.null&select=id,role,client_name,client_company,seniority,status&order=created_at.desc`, { headers: H }),
+        fetch(`${url}/rest/v1/finance_pricing?order=created_at.desc`, { headers: H }),
+      ]);
+      const profiles = pR.ok ? await pR.json() : [];
+      const pricing = fR.ok ? await fR.json() : [];
+      return res.status(200).json({ profiles, pricing });
     }
 
     return res.status(400).json({ error: "Unknown action" });

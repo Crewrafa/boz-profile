@@ -183,15 +183,17 @@ const DEV_ANA={email:ANA_EMAIL,id:"00000000-0000-0000-0000-000000000003"};
 const DEV_RECRUITER={email:RECRUITER_EMAIL,id:"00000000-0000-0000-0000-000000000004"};
 
 // ═══════════ LOGIN (professional dark tech) ═══════════
-function Login(){const[email,setEmail]=useState("");const[sent,setSent]=useState(false);const[err,setErr]=useState("");const[ld,setLd]=useState(false);
-  const go=async()=>{if(!email.includes("@"))return;setLd(true);setErr("");try{await magicLink(email);setSent(true)}catch(e){setErr(e.message)}finally{setLd(false)}};
+function Login(){const[email,setEmail]=useState("");const[pw,setPw]=useState("");const[err,setErr]=useState("");const[ld,setLd]=useState(false);
+  const go=async()=>{if(!email.includes("@")||!pw)return;setLd(true);setErr("");try{
+    const r=await fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"login",email,password:pw})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||"Login failed");
+    localStorage.setItem("sb-access-token",d.access_token);window.location.reload();
+  }catch(e){setErr(e.message)}finally{setLd(false)}};
   return(<div style={{minHeight:"100vh",background:"#060F22",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:DS.font.body,padding:16,position:"relative",overflow:"hidden"}}>
-    {/* Animated background particles */}
     <div style={{position:"absolute",inset:0,overflow:"hidden",pointerEvents:"none"}}>
       <div style={{position:"absolute",width:600,height:600,borderRadius:"50%",background:"radial-gradient(circle,rgba(27,111,232,0.15),transparent 70%)",top:"-20%",right:"-10%"}}/>
       <div style={{position:"absolute",width:400,height:400,borderRadius:"50%",background:"radial-gradient(circle,rgba(79,106,255,0.1),transparent 70%)",bottom:"-10%",left:"-5%"}}/>
-      <div style={{position:"absolute",width:200,height:200,borderRadius:"50%",background:"radial-gradient(circle,rgba(34,211,238,0.08),transparent 70%)",top:"30%",left:"20%"}}/>
-      {/* Grid lines */}
       <div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(rgba(27,111,232,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(27,111,232,0.03) 1px,transparent 1px)",backgroundSize:"60px 60px"}}/>
     </div>
     <div style={{maxWidth:440,width:"100%",animation:"fadeUp .5s both",position:"relative",zIndex:1}}>
@@ -200,26 +202,26 @@ function Login(){const[email,setEmail]=useState("");const[sent,setSent]=useState
         <div style={{fontSize:11,color:"rgba(255,255,255,0.35)",letterSpacing:4,textTransform:"uppercase"}}>Empowering IT Solutions</div>
         <div style={{width:60,height:2,background:"linear-gradient(90deg,transparent,#4F6AFF,transparent)",margin:"16px auto 0"}}/>
       </div>
-      <div style={{background:"rgba(255,255,255,0.03)",backdropFilter:"blur(24px)",borderRadius:DS.radius.xxl,padding:36,border:"1px solid rgba(255,255,255,0.07)",boxShadow:"0 8px 40px rgba(0,0,0,0.4),0 0 0 1px rgba(255,255,255,0.03)"}}>
-        <div style={{fontSize:22,fontWeight:700,color:"#fff",marginBottom:4,fontFamily:DS.font.heading,letterSpacing:"-0.02em"}}>Verified Fit</div>
-        <div style={{fontSize:13.5,color:"rgba(255,255,255,0.45)",marginBottom:28,fontFamily:DS.font.body}}>Sign in to access your IT talent profile builder.</div>
-        {!sent?<>
-          <div style={{fontSize:11,color:"rgba(255,255,255,0.5)",marginBottom:6,fontWeight:500,fontFamily:DS.font.body,letterSpacing:"0.05em",textTransform:"uppercase"}}>Email Address</div>
-          <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")go()}} placeholder="your@company.com" style={{width:"100%",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:DS.radius.md,padding:"13px 16px",fontSize:14,fontFamily:DS.font.body,outline:"none",color:"#fff",marginBottom:14,transition:`border-color .25s ${DS.ease.default},box-shadow .25s ${DS.ease.default}`}} onFocus={e=>{e.target.style.borderColor="rgba(27,111,232,0.5)";e.target.style.boxShadow="0 0 0 3px rgba(27,111,232,0.1)"}} onBlur={e=>{e.target.style.borderColor="rgba(255,255,255,0.1)";e.target.style.boxShadow="none"}}/>
-          {err&&<div style={{fontSize:12,color:"#f87171",marginBottom:10,padding:"8px 12px",background:"rgba(248,113,113,0.1)",borderRadius:DS.radius.md,fontFamily:DS.font.body}}>{err}</div>}
-          <button onClick={go} disabled={ld||!email.includes("@")} type="button" style={{width:"100%",background:email.includes("@")?`linear-gradient(135deg,${DS.brand.navy800},${DS.brand.blue700})`:"rgba(255,255,255,0.05)",color:email.includes("@")?"#fff":"rgba(255,255,255,0.3)",border:"none",borderRadius:DS.radius.md,padding:14,fontSize:14,fontWeight:600,cursor:email.includes("@")?"pointer":"default",fontFamily:DS.font.heading,boxShadow:email.includes("@")?DS.shadow.blue:"none",transition:`all .25s ${DS.ease.snap}`,letterSpacing:"-0.005em"}}>{ld?"Sending...":"Send Magic Link →"}</button>
-          {DEV_MODE&&<div style={{marginTop:16,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
-            <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginBottom:8,textAlign:"center",textTransform:"uppercase",letterSpacing:2}}>Dev Mode</div>
-            <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-              <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev");window.location.reload()}} style={{flex:"1 1 28%",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,padding:"8px",fontSize:10,color:"rgba(255,255,255,0.5)",cursor:"pointer",fontFamily:"inherit"}}>⚡ Admin</button>
-              <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-sales");window.location.reload()}} style={{flex:"1 1 28%",background:"rgba(5,150,105,0.12)",border:"1px solid rgba(5,150,105,0.25)",borderRadius:8,padding:"8px",fontSize:10,color:"rgba(52,211,153,0.8)",cursor:"pointer",fontFamily:"inherit"}}>💼 Sales</button>
-              <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-recruiter");window.location.reload()}} style={{flex:"1 1 28%",background:"rgba(249,115,22,0.12)",border:"1px solid rgba(249,115,22,0.25)",borderRadius:8,padding:"8px",fontSize:10,color:"rgba(251,146,60,0.8)",cursor:"pointer",fontFamily:"inherit"}}>🔍 Recruiter</button>
-              <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-ana");window.location.reload()}} style={{flex:"1 1 28%",background:"rgba(124,58,237,0.15)",border:"1px solid rgba(124,58,237,0.3)",borderRadius:8,padding:"8px",fontSize:10,color:"rgba(167,139,250,0.8)",cursor:"pointer",fontFamily:"inherit"}}>🧠 Ana</button>
-              <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-finance");window.location.reload()}} style={{flex:"1 1 28%",background:"rgba(3,105,161,0.12)",border:"1px solid rgba(3,105,161,0.25)",borderRadius:8,padding:"8px",fontSize:10,color:"rgba(56,189,248,0.8)",cursor:"pointer",fontFamily:"inherit"}}>💰 Finance</button>
-              <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-client");window.location.reload()}} style={{flex:"1 1 28%",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,padding:"8px",fontSize:10,color:"rgba(255,255,255,0.5)",cursor:"pointer",fontFamily:"inherit"}}>👤 Client</button>
-            </div>
-          </div>}
-        </>:<div style={{textAlign:"center"}}><div style={{width:56,height:56,borderRadius:"50%",background:"rgba(79,106,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",fontSize:24}}>✉️</div><div style={{fontSize:17,fontWeight:600,color:"#fff"}}>Check your inbox</div><div style={{fontSize:13,color:"rgba(255,255,255,0.45)",marginTop:6}}>We sent a secure login link to<br/><strong style={{color:"#4F6AFF"}}>{email}</strong></div><button onClick={()=>setSent(false)} type="button" style={{marginTop:20,fontSize:13,color:"#4F6AFF",background:"none",border:"1px solid rgba(79,106,255,0.3)",borderRadius:8,padding:"8px 20px",cursor:"pointer",fontFamily:"inherit"}}>Use different email</button></div>}
+      <div style={{background:"rgba(255,255,255,0.03)",backdropFilter:"blur(24px)",borderRadius:DS.radius.xxl,padding:36,border:"1px solid rgba(255,255,255,0.07)",boxShadow:"0 8px 40px rgba(0,0,0,0.4)"}}>
+        <div style={{fontSize:22,fontWeight:700,color:"#fff",marginBottom:4,fontFamily:DS.font.heading}}>Verified Fit</div>
+        <div style={{fontSize:13.5,color:"rgba(255,255,255,0.45)",marginBottom:28,fontFamily:DS.font.body}}>Sign in to access your workspace.</div>
+        <div style={{fontSize:11,color:"rgba(255,255,255,0.5)",marginBottom:6,fontWeight:500,textTransform:"uppercase",letterSpacing:"0.05em"}}>Email</div>
+        <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="your@company.com" style={{width:"100%",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:DS.radius.md,padding:"13px 16px",fontSize:14,fontFamily:DS.font.body,outline:"none",color:"#fff",marginBottom:14}} onFocus={e=>{e.target.style.borderColor="rgba(27,111,232,0.5)"}} onBlur={e=>{e.target.style.borderColor="rgba(255,255,255,0.1)"}}/>
+        <div style={{fontSize:11,color:"rgba(255,255,255,0.5)",marginBottom:6,fontWeight:500,textTransform:"uppercase",letterSpacing:"0.05em"}}>Password</div>
+        <input type="password" value={pw} onChange={e=>setPw(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")go()}} placeholder="••••••••" style={{width:"100%",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:DS.radius.md,padding:"13px 16px",fontSize:14,fontFamily:DS.font.body,outline:"none",color:"#fff",marginBottom:14}} onFocus={e=>{e.target.style.borderColor="rgba(27,111,232,0.5)"}} onBlur={e=>{e.target.style.borderColor="rgba(255,255,255,0.1)"}}/>
+        {err&&<div style={{fontSize:12,color:"#f87171",marginBottom:10,padding:"8px 12px",background:"rgba(248,113,113,0.1)",borderRadius:DS.radius.md}}>{err}</div>}
+        <button onClick={go} disabled={ld||!email.includes("@")||!pw} type="button" style={{width:"100%",background:email.includes("@")&&pw?`linear-gradient(135deg,${DS.brand.navy800},${DS.brand.blue700})`:"rgba(255,255,255,0.05)",color:email.includes("@")&&pw?"#fff":"rgba(255,255,255,0.3)",border:"none",borderRadius:DS.radius.md,padding:14,fontSize:14,fontWeight:600,cursor:email.includes("@")&&pw?"pointer":"default",fontFamily:DS.font.heading,boxShadow:email.includes("@")&&pw?DS.shadow.blue:"none"}}>{ld?"Signing in...":"Sign In →"}</button>
+        {DEV_MODE&&<div style={{marginTop:16,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
+          <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginBottom:8,textAlign:"center",textTransform:"uppercase",letterSpacing:2}}>Dev Mode</div>
+          <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+            <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev");window.location.reload()}} style={{flex:"1 1 28%",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,padding:"8px",fontSize:10,color:"rgba(255,255,255,0.5)",cursor:"pointer",fontFamily:"inherit"}}>⚡ Admin</button>
+            <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-sales");window.location.reload()}} style={{flex:"1 1 28%",background:"rgba(5,150,105,0.12)",border:"1px solid rgba(5,150,105,0.25)",borderRadius:8,padding:"8px",fontSize:10,color:"rgba(52,211,153,0.8)",cursor:"pointer",fontFamily:"inherit"}}>💼 Sales</button>
+            <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-recruiter");window.location.reload()}} style={{flex:"1 1 28%",background:"rgba(249,115,22,0.12)",border:"1px solid rgba(249,115,22,0.25)",borderRadius:8,padding:"8px",fontSize:10,color:"rgba(251,146,60,0.8)",cursor:"pointer",fontFamily:"inherit"}}>🔍 Recruiter</button>
+            <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-ana");window.location.reload()}} style={{flex:"1 1 28%",background:"rgba(124,58,237,0.15)",border:"1px solid rgba(124,58,237,0.3)",borderRadius:8,padding:"8px",fontSize:10,color:"rgba(167,139,250,0.8)",cursor:"pointer",fontFamily:"inherit"}}>🧠 Ana</button>
+            <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-finance");window.location.reload()}} style={{flex:"1 1 28%",background:"rgba(3,105,161,0.12)",border:"1px solid rgba(3,105,161,0.25)",borderRadius:8,padding:"8px",fontSize:10,color:"rgba(56,189,248,0.8)",cursor:"pointer",fontFamily:"inherit"}}>💰 Finance</button>
+            <button type="button" onClick={()=>{localStorage.setItem("sb-access-token","dev-client");window.location.reload()}} style={{flex:"1 1 28%",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,padding:"8px",fontSize:10,color:"rgba(255,255,255,0.5)",cursor:"pointer",fontFamily:"inherit"}}>👤 Client</button>
+          </div>
+        </div>}
       </div>
       <div style={{textAlign:"center",marginTop:24,fontSize:11,color:"rgba(255,255,255,0.2)"}}>© 2024 BOZ, Empowering IT Solutions. All Rights Reserved.</div>
     </div>
@@ -259,7 +261,7 @@ function Admin({user}){
   const[revGenerating,setRevGenerating]=useState(false);const[revSubmitting,setRevSubmitting]=useState(false);
   // Users state (for admin user management)
   const[users,setUsers]=useState([]);const[showAddUser,setShowAddUser]=useState(false);
-  const[newUser,setNewUser]=useState({email:"",role:"recruiter",name:""});
+  const[newUser,setNewUser]=useState({email:"",role:"recruiter",name:"",password:""});
   const isMob=useW()<640;
   // Phase 3: Admin alerts
   const[adminAlerts,setAdminAlerts]=useState([]);const[alertsLoading,setAlertsLoading]=useState(false);
@@ -316,8 +318,15 @@ function Admin({user}){
   // ═══ USER MANAGEMENT FUNCTIONS (admin only) ═══
   const addUser=async()=>{
     if(!newUser.email.includes("@")||!newUser.role)return show("⚠️ Email and role required");
-    try{const r=await fetch("/api/roles",{method:"POST",headers:ADM_AUTH(),body:JSON.stringify({action:"add",...newUser})});
-      const d=await r.json();if(d.error)return show("⚠️ "+d.error);setUsers(p=>[d,...p]);setNewUser({email:"",role:"recruiter",name:""});setShowAddUser(false);show("✅ User added");
+    if(newUser.password.length<6)return show("⚠️ Password must be at least 6 characters");
+    try{
+      // 1. Create auth user with password
+      const authR=await fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"create_user",email:newUser.email,password:newUser.password,role:newUser.role,name:newUser.name})});
+      const authD=await authR.json();if(!authR.ok)return show("⚠️ "+authD.error);
+      // 2. Add to roles table
+      const r=await fetch("/api/roles",{method:"POST",headers:ADM_AUTH(),body:JSON.stringify({action:"add",email:newUser.email,role:newUser.role,name:newUser.name})});
+      const d=await r.json();if(d.error)return show("⚠️ "+d.error);
+      setUsers(p=>[d,...p]);setNewUser({email:"",role:"recruiter",name:"",password:""});setShowAddUser(false);show("✅ User created with password");
     }catch(e){show("⚠️ "+e.message)}
   };
   const updateUserRole=async(id,role)=>{
@@ -1007,9 +1016,10 @@ function Admin({user}){
             <div style={{display:"flex",justifyContent:"space-between",marginBottom:20}}><div style={{fontSize:18,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading}}>Add User</div><button type="button" onClick={()=>setShowAddUser(false)} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",color:DS.text.faint}}>✕</button></div>
             <div style={{display:"flex",flexDirection:"column",gap:12}}>
               <div><div style={{fontSize:11,fontWeight:600,color:DS.text.muted,marginBottom:4}}>Email *</div><input type="email" value={newUser.email} onChange={e=>setNewUser({...newUser,email:e.target.value})} placeholder="user@company.com" style={{width:"100%",border:`1.5px solid ${DS.surface.border}`,borderRadius:DS.radius.sm,padding:"10px 14px",fontSize:13,fontFamily:DS.font.body}}/></div>
+              <div><div style={{fontSize:11,fontWeight:600,color:DS.text.muted,marginBottom:4}}>Password *</div><input type="password" value={newUser.password} onChange={e=>setNewUser({...newUser,password:e.target.value})} placeholder="Min 6 characters" style={{width:"100%",border:`1.5px solid ${DS.surface.border}`,borderRadius:DS.radius.sm,padding:"10px 14px",fontSize:13,fontFamily:DS.font.body}}/></div>
               <div><div style={{fontSize:11,fontWeight:600,color:DS.text.muted,marginBottom:4}}>Name</div><input type="text" value={newUser.name} onChange={e=>setNewUser({...newUser,name:e.target.value})} placeholder="Full name" style={{width:"100%",border:`1.5px solid ${DS.surface.border}`,borderRadius:DS.radius.sm,padding:"10px 14px",fontSize:13,fontFamily:DS.font.body}}/></div>
               <div><div style={{fontSize:11,fontWeight:600,color:DS.text.muted,marginBottom:4}}>Role *</div><div style={{display:"flex",flexWrap:"wrap",gap:6}}>{VALID_ROLES.map(r=><Pill key={r} label={`${ROLE_ICONS[r]} ${ROLE_LABELS[r]}`} selected={newUser.role===r} onClick={()=>setNewUser({...newUser,role:r})} color={ROLE_COLORS[r]} small/>)}</div></div>
-              <button type="button" onClick={addUser} disabled={!newUser.email.includes("@")} style={{width:"100%",marginTop:8,background:newUser.email.includes("@")?`linear-gradient(135deg,${DS.brand.navy900},${DS.brand.blue700})`:"#e2e8f0",color:newUser.email.includes("@")?"#fff":DS.text.faint,border:"none",borderRadius:DS.radius.md,padding:14,fontSize:14,fontWeight:600,fontFamily:DS.font.heading,cursor:newUser.email.includes("@")?"pointer":"default",boxShadow:newUser.email.includes("@")?DS.shadow.blue:"none"}}>Add User</button>
+              <button type="button" onClick={addUser} disabled={!newUser.email.includes("@")||newUser.password.length<6} style={{width:"100%",marginTop:8,background:newUser.email.includes("@")&&newUser.password.length>=6?`linear-gradient(135deg,${DS.brand.navy900},${DS.brand.blue700})`:"#e2e8f0",color:newUser.email.includes("@")&&newUser.password.length>=6?"#fff":DS.text.faint,border:"none",borderRadius:DS.radius.md,padding:14,fontSize:14,fontWeight:600,fontFamily:DS.font.heading,cursor:newUser.email.includes("@")&&newUser.password.length>=6?"pointer":"default",boxShadow:newUser.email.includes("@")&&newUser.password.length>=6?DS.shadow.blue:"none"}}>Add User</button>
             </div>
           </div>
         </div>)}
@@ -1049,6 +1059,11 @@ function Admin({user}){
               <div style={{fontSize:22,fontWeight:800,marginTop:6,fontFamily:DS.font.heading}}>{selP.role} — {selP.seniority}</div>
               <div style={{fontSize:13,opacity:.65,marginTop:4}}>{selP.category} · {selP.experience} · {selP.client_name}</div>
             </div>
+          </div>
+          {/* Document links */}
+          <div style={{display:"flex",gap:8,marginBottom:16,flexWrap:"wrap"}}>
+            <a href={`/api/pdf/${selP.id}`} target="_blank" rel="noopener noreferrer" style={{fontSize:12,color:DS.brand.blue700,border:`1.5px solid ${DS.brand.blue700}`,borderRadius:DS.radius.md,padding:"8px 16px",textDecoration:"none",fontFamily:DS.font.heading,fontWeight:600,display:"inline-flex",alignItems:"center",gap:4,background:"#fff",boxShadow:DS.shadow.sm}}>📄 Generated Profile PDF</a>
+            {selP.profile_data?.jdFileName&&<div style={{fontSize:12,color:"#059669",border:"1.5px solid #bbf7d0",borderRadius:DS.radius.md,padding:"8px 16px",background:"#f0fdf4",fontFamily:DS.font.body,display:"inline-flex",alignItems:"center",gap:4}}>📎 Client JD: {selP.profile_data.jdFileName}</div>}
           </div>
           <div style={{display:"grid",gridTemplateColumns:isMob?"1fr":"1fr 1fr",gap:20}}>
             <div>
@@ -1729,6 +1744,12 @@ function AnaModule({user}){
               {(selP.profile_data?.mustHave||[]).map(t=><span key={t} style={{background:"rgba(255,255,255,0.12)",padding:"4px 12px",borderRadius:DS.radius.pill,fontSize:10,border:"1px solid rgba(255,255,255,0.1)"}}>{t}</span>)}
             </div>
           </div>
+        </div>
+
+        {/* Document links */}
+        <div style={{display:"flex",gap:8,marginBottom:16,flexWrap:"wrap"}}>
+          <a href={`/api/pdf/${selP.id}`} target="_blank" rel="noopener noreferrer" style={{fontSize:12,color:"#7C3AED",border:"1.5px solid #7C3AED",borderRadius:DS.radius.md,padding:"8px 16px",textDecoration:"none",fontFamily:DS.font.heading,fontWeight:600,display:"inline-flex",alignItems:"center",gap:4,background:"#fff",boxShadow:DS.shadow.sm}}>📄 Generated Profile PDF</a>
+          {selP.profile_data?.jdFileName&&<div style={{fontSize:12,color:"#059669",border:"1.5px solid #bbf7d0",borderRadius:DS.radius.md,padding:"8px 16px",background:"#f0fdf4",fontFamily:DS.font.body,display:"inline-flex",alignItems:"center",gap:4}}>📎 Client JD: {selP.profile_data.jdFileName}</div>}
         </div>
 
         <div style={{display:"grid",gridTemplateColumns:isMob?"1fr":"1fr 1fr",gap:20}}>
@@ -2559,34 +2580,43 @@ function SalesModule({user}){
 
     {/* ═══ TAB 2: DASHBOARD ═══ */}
     {tab==="dashboard"&&(<div style={{animation:"fadeUp .3s both"}}>
-      {/* KPIs */}
-      <div style={{display:"grid",gridTemplateColumns:isMob?"repeat(2,1fr)":"repeat(6,1fr)",gap:10,marginBottom:24}}>
-        {[{l:"Total",v:totalProfiles,c:"#1B6FE8"},{l:"Active",v:activeProfiles,c:"#f59e0b"},{l:"Filled",v:filledCount,c:"#059669"},{l:"Conversion",v:`${conversionRate}%`,c:conversionRate>=50?"#059669":"#f59e0b"},{l:"Clients",v:uniqueClients,c:"#8b5cf6"},{l:"Candidates",v:allAssigns.length,c:"#0369a1"}].map((kpi,i)=>(
+      {/* Sales-specific KPIs */}
+      {(()=>{
+        const authorizedCount=ps.filter(p=>p.profile_data?.reviewAuthorized).length;
+        const acceptedCands=allAssigns.filter(a=>a.client_decision==="accepted").length;
+        const rejectedCands=allAssigns.filter(a=>a.client_decision==="rejected").length;
+        const pendingCands=allAssigns.filter(a=>!a.client_decision||a.client_decision==="pending").length;
+        const readyForClient=ps.filter(p=>p.status==="filled").length;
+        return(<>
+      <div style={{display:"grid",gridTemplateColumns:isMob?"repeat(2,1fr)":"repeat(5,1fr)",gap:10,marginBottom:24}}>
+        {[{l:"Clients",v:uniqueClients,c:"#8b5cf6"},{l:"Profiles",v:totalProfiles,c:"#1B6FE8"},{l:"Links Sent",v:authorizedCount,c:"#059669"},{l:"Ready for Client",v:readyForClient,c:"#f59e0b"},{l:"Client Responses",v:acceptedCands+rejectedCands,c:"#0369a1"}].map((kpi,i)=>(
           <div key={i} style={{background:"#fff",borderRadius:DS.radius.lg,padding:"18px 16px",border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm}}>
             <div style={{fontSize:10,color:DS.text.faint,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.05em",fontFamily:DS.font.body}}>{kpi.l}</div>
             <div style={{fontSize:26,fontWeight:800,color:kpi.c,fontFamily:DS.font.heading,lineHeight:1,marginTop:6}}>{kpi.v}</div>
           </div>
         ))}
       </div>
-      {/* Status breakdown + pipeline */}
       <div style={{display:"grid",gridTemplateColumns:isMob?"1fr":"1fr 1fr",gap:16}}>
+        {/* Client decisions */}
         <div style={{background:"#fff",borderRadius:DS.radius.xl,padding:"20px 22px",border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm}}>
-          <div style={{fontSize:14,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading,marginBottom:14}}>Pipeline Breakdown</div>
-          {Object.entries(STATUS_LABELS).map(([k,v])=>{const cnt=byStatus[k]||0;const pct=totalProfiles?Math.round((cnt/totalProfiles)*100):0;return(
-            <div key={k} style={{marginBottom:8}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:11,color:DS.text.body}}>{v}</span><span style={{fontSize:11,fontWeight:700,color:STATUS_COLORS[k]}}>{cnt}</span></div>
-            <div style={{height:4,background:DS.surface.sunken,borderRadius:2,overflow:"hidden"}}><div style={{height:"100%",width:`${pct}%`,background:STATUS_COLORS[k],borderRadius:2}}/></div></div>
+          <div style={{fontSize:14,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading,marginBottom:14}}>Client Decisions</div>
+          {[{l:"Accepted by Client",v:acceptedCands,c:"#059669"},{l:"Rejected by Client",v:rejectedCands,c:"#dc2626"},{l:"Pending Decision",v:pendingCands,c:"#f59e0b"},{l:"Review Links Live",v:authorizedCount,c:"#1B6FE8"}].map((m,i)=>{const pct=(acceptedCands+rejectedCands+pendingCands)?Math.round((m.v/(acceptedCands+rejectedCands+pendingCands))*100):0;return(
+            <div key={i} style={{marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:11,color:DS.text.body}}>{m.l}</span><span style={{fontSize:12,fontWeight:700,color:m.c}}>{m.v}</span></div>
+            <div style={{height:4,background:DS.surface.sunken,borderRadius:2,overflow:"hidden"}}><div style={{height:"100%",width:`${pct}%`,background:m.c,borderRadius:2}}/></div></div>
           )})}
         </div>
+        {/* By client */}
         <div style={{background:"#fff",borderRadius:DS.radius.xl,padding:"20px 22px",border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm}}>
-          <div style={{fontSize:14,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading,marginBottom:14}}>By Client</div>
-          {clients.map(company=>{const cnt=ps.filter(p=>p.client_company===company).length;return(
+          <div style={{fontSize:14,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading,marginBottom:14}}>Profiles by Client</div>
+          {clients.map(company=>{const cps=ps.filter(p=>p.client_company===company);const ready=cps.filter(p=>p.profile_data?.reviewAuthorized).length;return(
             <div key={company} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:`1px solid ${DS.surface.borderLight}`}}>
-              <span style={{fontSize:13,fontWeight:500,color:DS.text.body,fontFamily:DS.font.body}}>{company}</span>
-              <span style={{fontSize:14,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading}}>{cnt}</span>
+              <span style={{fontSize:13,fontWeight:500,color:DS.text.body}}>{company}</span>
+              <div style={{display:"flex",gap:8,alignItems:"center"}}><span style={{fontSize:10,color:DS.text.faint}}>{ready} live</span><span style={{fontSize:14,fontWeight:700,color:DS.text.h1}}>{cps.length}</span></div>
             </div>
           )})}
         </div>
       </div>
+      </>)})()}
     </div>)}
 
     {/* ═══ TAB 3: DELIVERY ═══ */}
@@ -2644,61 +2674,48 @@ function SalesModule({user}){
 // ═══════════ FINANCE MODULE ═══════════
 function FinanceModule({user}){
   const isMob=useW()<640;
-  const[clientRate,setClientRate]=useState(5000);
-  const[rockstarSalary,setRockstarSalary]=useState(2500);
-  const[resources,setResources]=useState(1);
-  const[contractMonths,setContractMonths]=useState(12);
-  const[vacationDays,setVacationDays]=useState(10);
-  const[holCountry,setHolCountry]=useState("Mexico");
-  const[startMonth,setStartMonth]=useState(new Date().getMonth());
-  const[startYear,setStartYear]=useState(new Date().getFullYear());
+  const[profiles,setProfiles]=useState([]);const[pricing,setPricing]=useState([]);const[ld,setLd]=useState(true);
+  const[toast,setToast]=useState("");const[selProfile,setSelProfile]=useState(null);
+  const[form,setForm]=useState({client_rate:5000,rockstar_salary:2500,resources:1,contract_months:12,vacation_days:10,holiday_country:"Mexico",notes:""});
+  const[saving,setSaving]=useState(false);
+  const show=(m)=>{setToast(m);setTimeout(()=>setToast(""),3500)};
 
-  // Holidays per country per month (approximate)
-  const HOLIDAYS={
-    Mexico:{0:1,1:1,2:1,3:1,4:1,5:0,6:0,7:0,8:1,9:0,10:1,11:2},// Jan:NY, Feb:Constitution, Mar:Juarez, Apr:Easter, May:Labor, Sep:Independence, Nov:Revolution, Dec:Xmas+Guadalupe
-    USA:{0:2,1:1,2:0,3:0,4:1,5:0,6:1,7:0,8:1,9:1,10:2,11:1},// Jan:NY+MLK, Feb:Presidents, May:Memorial, Jul:4th, Sep:Labor, Oct:Columbus, Nov:Veterans+Thanksgiving, Dec:Xmas
-    Canada:{0:1,1:1,2:0,3:1,4:1,5:0,6:1,7:1,8:1,9:1,10:1,11:1}// Jan:NY, Feb:Family, Apr:Easter, May:Victoria, Jul:Canada, Aug:Civic, Sep:Labor, Oct:Thanksgiving, Nov:Remembrance, Dec:Xmas
-  };
-  const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  const WORK_DAYS_MONTH=22; // average
+  useEffect(()=>{(async()=>{try{
+    const r=await fetch("/api/admin",{method:"POST",headers:{"Authorization":`Bearer ${localStorage.getItem("sb-access-token")}`,"Content-Type":"application/json"},body:JSON.stringify({action:"list_all_pricing"})});
+    if(r.ok){const d=await r.json();setProfiles(d.profiles||[]);setPricing(d.pricing||[])}
+  }catch(e){console.warn(e)}finally{setLd(false)}})()},[]);
 
-  // Calculate breakdown
-  const breakdown=[];
-  const holMap=HOLIDAYS[holCountry]||HOLIDAYS.Mexico;
-  const vacPerMonth=vacationDays/contractMonths;
+  const getPricing=(pid)=>pricing.find(p=>p.profile_id===pid);
+  const savePricing=async()=>{if(!selProfile)return;setSaving(true);try{
+    await fetch("/api/admin",{method:"POST",headers:{"Authorization":`Bearer ${localStorage.getItem("sb-access-token")}`,"Content-Type":"application/json"},body:JSON.stringify({action:"save_pricing",profile_id:selProfile.id,...form})});
+    setPricing(p=>{const idx=p.findIndex(x=>x.profile_id===selProfile.id);const item={...form,profile_id:selProfile.id};if(idx>=0){const n=[...p];n[idx]=item;return n}return[...p,item]});
+    show("✅ Pricing saved");
+  }catch(e){show("⚠️ "+e.message)}finally{setSaving(false)}};
 
-  for(let i=0;i<contractMonths;i++){
-    const m=(startMonth+i)%12;
-    const y=startYear+Math.floor((startMonth+i)/12);
-    const holidays=holMap[m]||0;
-    const billableDays=Math.max(0,WORK_DAYS_MONTH-holidays-vacPerMonth);
-    const billableRatio=billableDays/WORK_DAYS_MONTH;
-    const revenue=clientRate*resources;
-    const cost=rockstarSalary*resources;
-    const margin=revenue-cost;
-    breakdown.push({month:`${MONTHS[m]} ${y}`,m,revenue,cost,margin,holidays,billableDays:Math.round(billableDays*10)/10,billableRatio});
-  }
+  const HOLIDAYS={Mexico:{0:1,1:1,2:1,3:1,4:1,5:0,6:0,7:0,8:1,9:0,10:1,11:2},USA:{0:2,1:1,2:0,3:0,4:1,5:0,6:1,7:0,8:1,9:1,10:2,11:1},Canada:{0:1,1:1,2:0,3:1,4:1,5:0,6:1,7:1,8:1,9:1,10:1,11:1}};
+  const calcMargin=(pr)=>{if(!pr)return{margin:0,pct:0,revenue:0,cost:0};const rev=(pr.client_rate||0)*(pr.resources||1)*(pr.contract_months||12);const cost=(pr.rockstar_salary||0)*(pr.resources||1)*(pr.contract_months||12);return{margin:rev-cost,pct:rev?Math.round(((rev-cost)/rev)*100):0,revenue:rev,cost}};
+  const fmt=(n)=>"$"+Math.round(n).toLocaleString();
+  const IS={width:"100%",border:`1.5px solid ${DS.surface.border}`,borderRadius:DS.radius.sm,padding:"10px 14px",fontSize:13,fontFamily:DS.font.body,outline:"none",background:"#fff"};
+  const clients=[...new Set(profiles.map(p=>p.client_company).filter(Boolean))];
 
-  const totRevenue=breakdown.reduce((s,b)=>s+b.revenue,0);
-  const totCost=breakdown.reduce((s,b)=>s+b.cost,0);
-  const totMargin=totRevenue-totCost;
-  const marginPct=totRevenue?Math.round((totMargin/totRevenue)*100):0;
-  const monthlyMargin=contractMonths?Math.round(totMargin/contractMonths):0;
-  const totalHolidays=breakdown.reduce((s,b)=>s+b.holidays,0);
-  const effectiveDays=breakdown.reduce((s,b)=>s+b.billableDays,0);
+  // Overall totals
+  const allCalcs=profiles.map(p=>{const pr=getPricing(p.id);return{...p,calc:calcMargin(pr),pr}});
+  const totalRev=allCalcs.reduce((s,p)=>s+p.calc.revenue,0);
+  const totalCost=allCalcs.reduce((s,p)=>s+p.calc.cost,0);
+  const totalMargin=totalRev-totalCost;const totalPct=totalRev?Math.round((totalMargin/totalRev)*100):0;
+  const pricedCount=allCalcs.filter(p=>p.pr).length;
 
-  const fmt=(n)=>"$"+n.toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:0});
-  const IS={width:"100%",border:`1.5px solid ${DS.surface.border}`,borderRadius:DS.radius.sm,padding:"11px 14px",fontSize:14,fontFamily:DS.font.body,outline:"none",background:"#fff",color:DS.text.body};
+  if(ld)return<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:DS.surface.page}}><Spinner text="Loading..."/></div>;
 
   return(<div style={{minHeight:"100vh",background:`linear-gradient(160deg,#F0F9FF,#E0F2FE 30%,${DS.surface.page})`,fontFamily:DS.font.body,display:"flex",flexDirection:"column"}}>
-    {/* Header */}
+    {toast&&<div style={{position:"fixed",top:20,left:"50%",transform:"translateX(-50%)",zIndex:100,background:toast.includes("⚠️")?"#dc2626":"#0D2550",color:"#fff",padding:"12px 28px",borderRadius:DS.radius.lg,fontSize:13,fontWeight:500,boxShadow:DS.shadow.lg,animation:"fadeUp .3s both"}}>{toast}</div>}
     <div style={{background:"linear-gradient(135deg,#0C4A6E,#0369A1,#0EA5E9)",position:"relative",overflow:"hidden"}}>
       <HeaderBG/>
-      <div style={{maxWidth:1000,margin:"0 auto",padding:"18px 24px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative",zIndex:1}}>
+      <div style={{maxWidth:1100,margin:"0 auto",padding:"18px 24px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative",zIndex:1}}>
         <div style={{display:"flex",alignItems:"center",gap:14}}>
           <span style={{fontSize:22,fontWeight:800,color:"#fff",letterSpacing:1.5,fontFamily:DS.font.heading}}>BOZ<span style={{color:"#7DD3FC"}}>.</span></span>
           <div style={{height:20,width:1,background:"rgba(255,255,255,0.15)"}}/>
-          <span style={{fontSize:13,fontWeight:600,color:"rgba(125,211,252,0.8)",fontFamily:DS.font.heading}}>Finance — Revenue Calculator</span>
+          <span style={{fontSize:13,fontWeight:600,color:"rgba(125,211,252,0.8)",fontFamily:DS.font.heading}}>Finance — Revenue by Profile</span>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <span style={{fontSize:12,color:"rgba(255,255,255,0.7)",fontFamily:DS.font.body}}>{user.email}</span>
@@ -2706,126 +2723,74 @@ function FinanceModule({user}){
         </div>
       </div>
     </div>
-
-    <div style={{maxWidth:1000,margin:"0 auto",padding:"24px",flex:1,width:"100%"}}>
-
-      {/* KPI Summary */}
+    <div style={{maxWidth:1100,margin:"0 auto",padding:"24px",flex:1,width:"100%"}}>
+      {/* KPIs */}
       <div style={{display:"grid",gridTemplateColumns:isMob?"repeat(2,1fr)":"repeat(5,1fr)",gap:10,marginBottom:24}}>
-        {[
-          {l:"Contract Revenue",v:fmt(totRevenue),c:"#0369A1",sub:`${contractMonths} months`},
-          {l:"Total Cost",v:fmt(totCost),c:"#dc2626",sub:`${resources} resource${resources>1?"s":""}`},
-          {l:"Net Margin",v:fmt(totMargin),c:totMargin>0?"#059669":"#dc2626",sub:`${marginPct}% margin`},
-          {l:"Monthly Margin",v:fmt(monthlyMargin),c:monthlyMargin>0?"#059669":"#f59e0b",sub:"per month avg"},
-          {l:"Effective Days",v:Math.round(effectiveDays),c:"#8b5cf6",sub:`${totalHolidays} holidays + ${vacationDays}d vacation`},
-        ].map((kpi,i)=>(
-          <div key={i} style={{background:"#fff",borderRadius:DS.radius.lg,padding:"18px 16px",border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm,animation:`fadeUp .3s ${i*0.05}s both`}}>
-            <div style={{fontSize:10,color:DS.text.faint,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.05em",fontFamily:DS.font.body}}>{kpi.l}</div>
-            <div style={{fontSize:24,fontWeight:800,color:kpi.c,fontFamily:DS.font.heading,lineHeight:1,marginTop:6}}>{kpi.v}</div>
-            <div style={{fontSize:10,color:DS.text.muted,fontFamily:DS.font.body,marginTop:3}}>{kpi.sub}</div>
+        {[{l:"Total Revenue",v:fmt(totalRev),c:"#0369A1"},{l:"Total Cost",v:fmt(totalCost),c:"#dc2626"},{l:"Net Margin",v:fmt(totalMargin),c:totalMargin>0?"#059669":"#dc2626"},{l:"Avg Margin",v:`${totalPct}%`,c:totalPct>=40?"#059669":totalPct>=20?"#f59e0b":"#dc2626"},{l:"Priced",v:`${pricedCount}/${profiles.length}`,c:"#8b5cf6"}].map((kpi,i)=>(
+          <div key={i} style={{background:"#fff",borderRadius:DS.radius.lg,padding:"18px 16px",border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm}}>
+            <div style={{fontSize:10,color:DS.text.faint,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.05em"}}>{kpi.l}</div>
+            <div style={{fontSize:22,fontWeight:800,color:kpi.c,fontFamily:DS.font.heading,lineHeight:1,marginTop:6}}>{kpi.v}</div>
           </div>
         ))}
       </div>
-
-      <div style={{display:"grid",gridTemplateColumns:isMob?"1fr":"360px 1fr",gap:20}}>
-
-        {/* Left: Inputs */}
-        <div style={{background:"#fff",borderRadius:DS.radius.xl,padding:"24px",border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm,alignSelf:"flex-start"}}>
-          <div style={{fontSize:16,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading,marginBottom:4}}>Parameters</div>
-          <div style={{fontSize:11,color:DS.text.muted,fontFamily:DS.font.body,marginBottom:18}}>Adjust to simulate different scenarios</div>
-
-          <div style={{marginBottom:14}}><div style={{fontSize:11,fontWeight:600,color:DS.text.muted,marginBottom:5}}>Client Rate (USD/month per resource)</div>
-            <input type="number" value={clientRate} onChange={e=>setClientRate(+e.target.value||0)} style={IS}/>
-            <input type="range" min={1000} max={20000} step={100} value={clientRate} onChange={e=>setClientRate(+e.target.value)} style={{width:"100%",accentColor:"#0369A1",marginTop:6}}/>
-          </div>
-
-          <div style={{marginBottom:14}}><div style={{fontSize:11,fontWeight:600,color:DS.text.muted,marginBottom:5}}>Rockstar Salary (USD/month)</div>
-            <input type="number" value={rockstarSalary} onChange={e=>setRockstarSalary(+e.target.value||0)} style={IS}/>
-            <input type="range" min={500} max={15000} step={100} value={rockstarSalary} onChange={e=>setRockstarSalary(+e.target.value)} style={{width:"100%",accentColor:"#dc2626",marginTop:6}}/>
-          </div>
-
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
-            <div><div style={{fontSize:11,fontWeight:600,color:DS.text.muted,marginBottom:5}}>Resources</div>
-              <input type="number" min={1} max={50} value={resources} onChange={e=>setResources(Math.max(1,+e.target.value||1))} style={IS}/></div>
-            <div><div style={{fontSize:11,fontWeight:600,color:DS.text.muted,marginBottom:5}}>Contract (months)</div>
-              <input type="number" min={1} max={36} value={contractMonths} onChange={e=>setContractMonths(Math.max(1,+e.target.value||1))} style={IS}/></div>
-          </div>
-
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
-            <div><div style={{fontSize:11,fontWeight:600,color:DS.text.muted,marginBottom:5}}>Vacation Days</div>
-              <input type="number" min={0} max={30} value={vacationDays} onChange={e=>setVacationDays(Math.max(0,+e.target.value||0))} style={IS}/></div>
-            <div><div style={{fontSize:11,fontWeight:600,color:DS.text.muted,marginBottom:5}}>Holiday Country</div>
-              <select value={holCountry} onChange={e=>setHolCountry(e.target.value)} style={{...IS,cursor:"pointer"}}>
-                {HOLIDAY_COUNTRIES.map(c=><option key={c}>{c}</option>)}
-              </select></div>
-          </div>
-
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-            <div><div style={{fontSize:11,fontWeight:600,color:DS.text.muted,marginBottom:5}}>Start Month</div>
-              <select value={startMonth} onChange={e=>setStartMonth(+e.target.value)} style={{...IS,cursor:"pointer"}}>
-                {MONTHS.map((m,i)=><option key={i} value={i}>{m}</option>)}
-              </select></div>
-            <div><div style={{fontSize:11,fontWeight:600,color:DS.text.muted,marginBottom:5}}>Start Year</div>
-              <select value={startYear} onChange={e=>setStartYear(+e.target.value)} style={{...IS,cursor:"pointer"}}>
-                {[2025,2026,2027,2028].map(y=><option key={y}>{y}</option>)}
-              </select></div>
-          </div>
-
-          {/* Margin indicator */}
-          <div style={{marginTop:20,padding:"14px 16px",borderRadius:DS.radius.lg,background:marginPct>=40?"#f0fdf4":marginPct>=20?"#FEFCE8":"#fef2f2",border:`1px solid ${marginPct>=40?"#bbf7d0":marginPct>=20?"#FDE68A":"#fecaca"}`}}>
-            <div style={{fontSize:12,fontWeight:700,color:marginPct>=40?"#059669":marginPct>=20?"#d97706":"#dc2626",fontFamily:DS.font.heading}}>
-              {marginPct>=40?"💰 Strong margin":marginPct>=20?"⚠️ Moderate margin":"🔴 Low margin"}
-            </div>
-            <div style={{fontSize:11,color:DS.text.muted,fontFamily:DS.font.body,marginTop:2}}>
-              {marginPct}% — {marginPct>=40?"This deal is profitable":"Consider adjusting rates"}
-            </div>
-          </div>
-        </div>
-
-        {/* Right: Monthly Breakdown */}
-        <div style={{background:"#fff",borderRadius:DS.radius.xl,padding:"24px",border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm}}>
-          <div style={{fontSize:16,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading,marginBottom:4}}>Monthly Breakdown</div>
-          <div style={{fontSize:11,color:DS.text.muted,fontFamily:DS.font.body,marginBottom:16}}>{contractMonths} months · {holCountry} holidays · {vacationDays} vacation days</div>
-
-          {/* Table header */}
-          <div style={{display:"grid",gridTemplateColumns:"1fr repeat(4,minmax(70px,1fr))",gap:0,borderBottom:`2px solid ${DS.surface.border}`,paddingBottom:8,marginBottom:4}}>
-            {["Month","Revenue","Cost","Margin","Days"].map(h=>(
-              <div key={h} style={{fontSize:10,fontWeight:700,color:DS.text.faint,textTransform:"uppercase",letterSpacing:"0.04em",fontFamily:DS.font.body,textAlign:h==="Month"?"left":"right"}}>{h}</div>
-            ))}
-          </div>
-
-          {/* Rows */}
-          <div style={{maxHeight:480,overflowY:"auto"}}>
-            {breakdown.map((b,i)=>(
-              <div key={i} style={{display:"grid",gridTemplateColumns:"1fr repeat(4,minmax(70px,1fr))",gap:0,padding:"10px 0",borderBottom:`1px solid ${DS.surface.borderLight}`,animation:`fadeUp .2s ${i*0.03}s both`}}>
-                <div style={{fontSize:13,fontWeight:600,color:DS.text.h2,fontFamily:DS.font.heading}}>{b.month}</div>
-                <div style={{fontSize:13,color:"#0369A1",fontWeight:600,fontFamily:DS.font.body,textAlign:"right"}}>{fmt(b.revenue)}</div>
-                <div style={{fontSize:13,color:"#dc2626",fontWeight:500,fontFamily:DS.font.body,textAlign:"right"}}>{fmt(b.cost)}</div>
-                <div style={{fontSize:13,color:b.margin>0?"#059669":"#dc2626",fontWeight:700,fontFamily:DS.font.heading,textAlign:"right"}}>{fmt(b.margin)}</div>
-                <div style={{fontSize:12,color:DS.text.muted,fontFamily:DS.font.body,textAlign:"right"}}>{b.billableDays}<span style={{fontSize:9,color:DS.text.faint}}> ({b.holidays}h)</span></div>
+      <div style={{display:"grid",gridTemplateColumns:isMob?"1fr":selProfile?"1fr 380px":"1fr",gap:20}}>
+        {/* Profile list by client */}
+        <div>
+          {clients.map(company=>{const cps=allCalcs.filter(p=>p.client_company===company);const cRev=cps.reduce((s,p)=>s+p.calc.revenue,0);const cMargin=cps.reduce((s,p)=>s+p.calc.margin,0);const cPct=cRev?Math.round((cMargin/cRev)*100):0;
+          return(<div key={company} style={{marginBottom:16}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+              <div style={{fontSize:15,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading}}>{company}</div>
+              <div style={{display:"flex",gap:12,fontSize:11,color:DS.text.muted}}>
+                <span>Rev: <strong style={{color:"#0369A1"}}>{fmt(cRev)}</strong></span>
+                <span>Margin: <strong style={{color:cMargin>0?"#059669":"#dc2626"}}>{fmt(cMargin)} ({cPct}%)</strong></span>
               </div>
-            ))}
-          </div>
-
-          {/* Totals */}
-          <div style={{display:"grid",gridTemplateColumns:"1fr repeat(4,minmax(70px,1fr))",gap:0,padding:"14px 0",borderTop:`2px solid ${DS.brand.navy900}`,marginTop:4}}>
-            <div style={{fontSize:13,fontWeight:800,color:DS.text.h1,fontFamily:DS.font.heading}}>TOTAL</div>
-            <div style={{fontSize:14,fontWeight:800,color:"#0369A1",fontFamily:DS.font.heading,textAlign:"right"}}>{fmt(totRevenue)}</div>
-            <div style={{fontSize:14,fontWeight:800,color:"#dc2626",fontFamily:DS.font.heading,textAlign:"right"}}>{fmt(totCost)}</div>
-            <div style={{fontSize:14,fontWeight:800,color:totMargin>0?"#059669":"#dc2626",fontFamily:DS.font.heading,textAlign:"right"}}>{fmt(totMargin)}</div>
-            <div style={{fontSize:12,fontWeight:700,color:DS.text.body,fontFamily:DS.font.body,textAlign:"right"}}>{Math.round(effectiveDays)}d</div>
-          </div>
-
-          {/* Visual margin bar */}
-          <div style={{marginTop:16}}>
-            <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:DS.text.faint,marginBottom:4}}>
-              <span>Cost {100-marginPct}%</span><span>Margin {marginPct}%</span>
             </div>
-            <div style={{height:12,borderRadius:6,overflow:"hidden",display:"flex",background:DS.surface.sunken}}>
-              <div style={{width:`${100-marginPct}%`,background:"linear-gradient(90deg,#dc2626,#f87171)",transition:"width .5s"}}/>
-              <div style={{width:`${marginPct}%`,background:"linear-gradient(90deg,#10b981,#059669)",transition:"width .5s"}}/>
-            </div>
-          </div>
+            {cps.map((p,i)=>{const pr=p.pr;const m=p.calc;const viable=m.pct>=40?"💰":m.pct>=20?"⚠️":m.pct>0?"🔴":"—";
+              return(<div key={p.id} onClick={()=>{setSelProfile(p);const existing=getPricing(p.id);setForm(existing?{client_rate:existing.client_rate||5000,rockstar_salary:existing.rockstar_salary||2500,resources:existing.resources||1,contract_months:existing.contract_months||12,vacation_days:existing.vacation_days??10,holiday_country:existing.holiday_country||"Mexico",notes:existing.notes||""}:{client_rate:5000,rockstar_salary:2500,resources:1,contract_months:12,vacation_days:10,holiday_country:"Mexico",notes:""})}} style={{background:selProfile?.id===p.id?"#f0f9ff":"#fff",borderRadius:DS.radius.lg,padding:"14px 18px",marginBottom:6,border:`1px solid ${selProfile?.id===p.id?"#0369A1":DS.surface.border}`,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",transition:"all .2s",boxShadow:DS.shadow.sm}} onMouseEnter={e=>{if(selProfile?.id!==p.id)e.currentTarget.style.borderColor="#93c5fd"}} onMouseLeave={e=>{if(selProfile?.id!==p.id)e.currentTarget.style.borderColor=DS.surface.border}}>
+                <div>
+                  <div style={{fontSize:13,fontWeight:600,color:DS.text.h1,fontFamily:DS.font.heading}}>{p.role} — {p.seniority}</div>
+                  <div style={{fontSize:11,color:DS.text.muted,marginTop:2}}>{p.client_name} · {STATUS_LABELS[p.status]||p.status}</div>
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:12,flexShrink:0}}>
+                  {pr?<>
+                    <div style={{textAlign:"right"}}><div style={{fontSize:12,fontWeight:700,color:m.margin>0?"#059669":"#dc2626"}}>{fmt(m.margin)}</div><div style={{fontSize:9,color:DS.text.faint}}>{m.pct}% margin</div></div>
+                    <span style={{fontSize:16}}>{viable}</span>
+                  </>:<span style={{fontSize:10,color:DS.text.placeholder,background:DS.surface.sunken,padding:"4px 10px",borderRadius:DS.radius.pill}}>Not priced</span>}
+                </div>
+              </div>);})}
+          </div>);})}
+          {!profiles.length&&<div style={{textAlign:"center",padding:48,background:"#fff",borderRadius:DS.radius.xl,border:`1px solid ${DS.surface.border}`,color:DS.text.faint}}><div style={{fontSize:36,marginBottom:10}}>💰</div>No profiles yet</div>}
         </div>
+        {/* Pricing form */}
+        {selProfile&&<div style={{background:"#fff",borderRadius:DS.radius.xl,padding:"22px",border:`1px solid ${DS.surface.border}`,boxShadow:DS.shadow.sm,alignSelf:"flex-start",position:"sticky",top:24}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
+            <div><div style={{fontSize:15,fontWeight:700,color:DS.text.h1,fontFamily:DS.font.heading}}>{selProfile.role}</div><div style={{fontSize:11,color:DS.text.muted,marginTop:2}}>{selProfile.client_company} · {selProfile.seniority}</div></div>
+            <button type="button" onClick={()=>setSelProfile(null)} style={{background:"none",border:"none",fontSize:16,cursor:"pointer",color:DS.text.faint}}>✕</button>
+          </div>
+          <div style={{display:"grid",gap:12}}>
+            <div><div style={{fontSize:11,fontWeight:600,color:DS.text.muted,marginBottom:4}}>Client Rate (USD/month)</div><input type="number" value={form.client_rate} onChange={e=>setForm({...form,client_rate:+e.target.value||0})} style={IS}/><input type="range" min={1000} max={20000} step={100} value={form.client_rate} onChange={e=>setForm({...form,client_rate:+e.target.value})} style={{width:"100%",accentColor:"#0369A1",marginTop:4}}/></div>
+            <div><div style={{fontSize:11,fontWeight:600,color:DS.text.muted,marginBottom:4}}>Rockstar Salary (USD/month)</div><input type="number" value={form.rockstar_salary} onChange={e=>setForm({...form,rockstar_salary:+e.target.value||0})} style={IS}/><input type="range" min={500} max={15000} step={100} value={form.rockstar_salary} onChange={e=>setForm({...form,rockstar_salary:+e.target.value})} style={{width:"100%",accentColor:"#dc2626",marginTop:4}}/></div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+              <div><div style={{fontSize:11,fontWeight:600,color:DS.text.muted,marginBottom:4}}>Resources</div><input type="number" min={1} max={50} value={form.resources} onChange={e=>setForm({...form,resources:Math.max(1,+e.target.value||1)})} style={IS}/></div>
+              <div><div style={{fontSize:11,fontWeight:600,color:DS.text.muted,marginBottom:4}}>Months</div><input type="number" min={1} max={36} value={form.contract_months} onChange={e=>setForm({...form,contract_months:Math.max(1,+e.target.value||1)})} style={IS}/></div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+              <div><div style={{fontSize:11,fontWeight:600,color:DS.text.muted,marginBottom:4}}>Vacation</div><input type="number" min={0} max={30} value={form.vacation_days} onChange={e=>setForm({...form,vacation_days:+e.target.value||0})} style={IS}/></div>
+              <div><div style={{fontSize:11,fontWeight:600,color:DS.text.muted,marginBottom:4}}>Country</div><select value={form.holiday_country} onChange={e=>setForm({...form,holiday_country:e.target.value})} style={{...IS,cursor:"pointer"}}>{HOLIDAY_COUNTRIES.map(c=><option key={c}>{c}</option>)}</select></div>
+            </div>
+            <textarea value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})} placeholder="Notes..." rows={2} style={{...IS,resize:"none"}}/>
+          </div>
+          {(()=>{const m=calcMargin(form);const pct=m.pct;return(<>
+            <div style={{marginTop:16,padding:"14px",borderRadius:DS.radius.lg,background:pct>=40?"#f0fdf4":pct>=20?"#FEFCE8":"#fef2f2",border:`1px solid ${pct>=40?"#bbf7d0":pct>=20?"#FDE68A":"#fecaca"}`}}>
+              <div style={{display:"flex",justifyContent:"space-between"}}>
+                <span style={{fontSize:12,fontWeight:700,color:pct>=40?"#059669":pct>=20?"#d97706":"#dc2626"}}>{pct>=40?"💰 Viable":pct>=20?"⚠️ Moderate":"🔴 Not viable"}</span>
+                <span style={{fontSize:14,fontWeight:800,color:pct>=40?"#059669":pct>=20?"#d97706":"#dc2626"}}>{pct}%</span>
+              </div>
+              <div style={{fontSize:11,color:DS.text.muted,marginTop:4}}>Revenue: {fmt(m.revenue)} · Cost: {fmt(m.cost)} · Margin: {fmt(m.margin)}</div>
+            </div>
+            <button type="button" onClick={savePricing} disabled={saving} style={{width:"100%",marginTop:12,background:`linear-gradient(135deg,#0C4A6E,#0369A1)`,color:"#fff",border:"none",borderRadius:DS.radius.md,padding:13,fontSize:14,fontWeight:600,cursor:"pointer",fontFamily:DS.font.heading,boxShadow:"0 4px 12px rgba(3,105,161,0.2)"}}>{saving?"Saving...":"💾 Save Pricing"}</button>
+          </>)})()}
+        </div>}
       </div>
     </div>
     <Footer/>
