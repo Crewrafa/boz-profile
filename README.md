@@ -1,4 +1,4 @@
-# BOZ Verified Fit v10.0
+# BOZ Verified Fit v12.0
 
 IT Staffing Profile Builder — Define your ideal tech talent with precision.
 
@@ -35,24 +35,39 @@ npm run dev
 
 ```
 api/
-  admin.js      — Admin ATS endpoints (auth-gated to ADMIN_EMAIL)
-  client.js     — Client profile operations (auth-gated to any user)
-  claude.js     — Claude API proxy (model-locked, token-capped)
-  pdf/[id].js   — Serves PDF HTML by profile UUID
+  admin.js       — Admin + Recruiter endpoints (profiles, candidates, assignments)
+  ana.js         — Ana/psychologist soft skills endpoints
+  auth.js        — Role lookup from Supabase roles table
+  claude.js      — Claude API proxy (model-locked, token-capped)
+  client.js      — Client profile CRUD operations
+  recruiter.js   — Recruiter review, accept/reject, questions
+  roles.js       — User/role management (admin only)
+  pdf/[id].js    — Serves PDF HTML by profile UUID
   review/[id].js — Interactive candidate review page
 src/
-  App.jsx       — React SPA (Login, Admin ATS, Client Form)
-  data.js       — Constants, categories, roles, tools
-  main.jsx      — Entry point
+  App.jsx        — React SPA (Login, Admin ATS, Recruiter, Ana, Client Form, Sales, Finance)
+  data.js        — Constants, categories, roles, tools
+  main.jsx       — Entry point
 ```
+
+## Modules
+
+| Module | Role | Color | Description |
+|--------|------|-------|-------------|
+| Admin | admin | Navy #0D2550 | Pipeline, candidates, users, full oversight |
+| Recruiter | recruiter | Orange #f97316 | Review profiles, approve/reject, add notes |
+| Ana | ana | Purple #7C3AED | Soft skills evaluation (blocked until recruiter approves) |
+| Sales | sales | Green #059669 | Links dashboard, quick access |
+| Finance | finance | Blue #0369a1 | Placeholder — coming soon |
+| Client | (public) | White | 8-step profile form + AI job description |
 
 ## Security
 
 - All data operations go through server APIs (never direct Supabase from client)
-- Admin endpoints require `verifyAdmin()` — checks email matches `ADMIN_EMAIL`
+- Admin endpoints require role verification via roles table
 - Client endpoints verify JWT token with Supabase Auth
-- Dev mode tokens (`dev`, `dev-client`) only accepted when `VITE_DEV_MODE=true`
-- Claude proxy: model locked to `claude-sonnet-4-20250514`, max 2000 tokens, origin check
+- Dev mode tokens only accepted when VITE_DEV_MODE=true
+- Claude proxy: model locked, max 2000 tokens, origin check
 - Input sanitization on all API endpoints
 - UUID validation on all ID parameters
 - Body size limits on all endpoints

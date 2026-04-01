@@ -176,7 +176,7 @@ function Footer(){
 }
 
 // ═══════════ DEV MODE — change to false for production ═══════════
-const DEV_MODE=true;
+const DEV_MODE=import.meta.env.VITE_DEV_MODE==="true";
 const DEV_USER={email:"psicologorafaelbaez@gmail.com",id:"00000000-0000-0000-0000-000000000001"};
 const DEV_CLIENT={email:"client@test.com",id:"00000000-0000-0000-0000-000000000002"};
 const DEV_ANA={email:ANA_EMAIL,id:"00000000-0000-0000-0000-000000000003"};
