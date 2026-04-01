@@ -756,6 +756,7 @@ function Admin({user}){
                   {Object.entries(STATUS_LABELS).map(([k,v])=><option key={k} value={k} style={{color:"#000"}}>{v}</option>)}
                 </select>
                 <a href={`/api/pdf/${selP.id}`} target="_blank" rel="noopener noreferrer" style={{fontSize:11,color:"#fff",border:"1px solid rgba(255,255,255,0.15)",borderRadius:DS.radius.sm,padding:"6px 14px",textDecoration:"none",fontFamily:DS.font.body,transition:`all .2s ${DS.ease.default}`}}>📄 PDF</a>
+                {selP.profile_data?.jdFilePath&&<button type="button" onClick={()=>downloadJD(selP.profile_data.jdFilePath)} style={{fontSize:11,color:"#6EE7B7",border:"1px solid rgba(110,231,183,0.2)",borderRadius:DS.radius.sm,padding:"6px 14px",background:"rgba(5,150,105,0.08)",cursor:"pointer",fontFamily:DS.font.body}}>📎 JD</button>}
                 {selP.profile_data?.reviewAuthorized?<>
                   <button type="button" onClick={()=>copyReviewLink(selP.id)} style={{fontSize:11,color:"#fff",border:"1px solid rgba(255,255,255,0.15)",borderRadius:DS.radius.sm,padding:"6px 14px",background:"none",cursor:"pointer",fontFamily:DS.font.body}}>🔗 Share</button>
                   {isAdmin&&<button type="button" onClick={()=>authorizeReview(selP.id,false)} style={{fontSize:11,color:"#fca5a5",border:"1px solid rgba(252,165,165,0.2)",borderRadius:DS.radius.sm,padding:"6px 14px",background:"rgba(239,68,68,0.08)",cursor:"pointer",fontFamily:DS.font.body}}>🔒 Revoke</button>}
@@ -883,6 +884,13 @@ function Admin({user}){
   const greeting=new Date().getHours()<12?"Good morning":new Date().getHours()<18?"Good afternoon":"Good evening";
   // Role theming
   const RC=isRecruiter?{accent:"#f97316",accentLight:"rgba(249,115,22,0.15)",dot:"#f97316",label:"Recruiter",gradLogo:"linear-gradient(135deg,#f97316,#fb923c)"}:{accent:DS.brand.cyan600,accentLight:"rgba(27,111,232,0.15)",dot:DS.brand.cyan600,label:"Admin",gradLogo:`linear-gradient(135deg,${DS.brand.blue700},${DS.brand.cyan600})`};
+
+  // ═══ Download JD from storage ═══
+  const downloadJD=async(filePath)=>{
+    try{const r=await fetch("/api/admin",{method:"POST",headers:ADM_AUTH(),body:JSON.stringify({action:"get_jd_url",file_path:filePath})});
+      const d=await r.json();if(d.url)window.open(d.url,"_blank");else show("⚠️ JD file not found");
+    }catch(e){show("⚠️ "+e.message)}
+  };
 
   // ═══ Authorize review link ═══
   const authorizeReview=async(profileId,authorize)=>{
@@ -1063,7 +1071,7 @@ function Admin({user}){
           {/* Document links */}
           <div style={{display:"flex",gap:8,marginBottom:16,flexWrap:"wrap"}}>
             <a href={`/api/pdf/${selP.id}`} target="_blank" rel="noopener noreferrer" style={{fontSize:12,color:DS.brand.blue700,border:`1.5px solid ${DS.brand.blue700}`,borderRadius:DS.radius.md,padding:"8px 16px",textDecoration:"none",fontFamily:DS.font.heading,fontWeight:600,display:"inline-flex",alignItems:"center",gap:4,background:"#fff",boxShadow:DS.shadow.sm}}>📄 Generated Profile PDF</a>
-            {selP.profile_data?.jdFileName&&<div style={{fontSize:12,color:"#059669",border:"1.5px solid #bbf7d0",borderRadius:DS.radius.md,padding:"8px 16px",background:"#f0fdf4",fontFamily:DS.font.body,display:"inline-flex",alignItems:"center",gap:4}}>📎 Client JD: {selP.profile_data.jdFileName}</div>}
+            {selP.profile_data?.jdFilePath&&<button type="button" onClick={()=>downloadJD(selP.profile_data.jdFilePath)} style={{fontSize:12,color:"#059669",border:"1.5px solid #bbf7d0",borderRadius:DS.radius.md,padding:"8px 16px",background:"#f0fdf4",fontFamily:DS.font.body,display:"inline-flex",alignItems:"center",gap:4,cursor:"pointer"}}>📎 Client JD: {selP.profile_data.jdFileName||"Download"}</button>}
           </div>
           <div style={{display:"grid",gridTemplateColumns:isMob?"1fr":"1fr 1fr",gap:20}}>
             <div>
@@ -1749,7 +1757,7 @@ function AnaModule({user}){
         {/* Document links */}
         <div style={{display:"flex",gap:8,marginBottom:16,flexWrap:"wrap"}}>
           <a href={`/api/pdf/${selP.id}`} target="_blank" rel="noopener noreferrer" style={{fontSize:12,color:"#7C3AED",border:"1.5px solid #7C3AED",borderRadius:DS.radius.md,padding:"8px 16px",textDecoration:"none",fontFamily:DS.font.heading,fontWeight:600,display:"inline-flex",alignItems:"center",gap:4,background:"#fff",boxShadow:DS.shadow.sm}}>📄 Generated Profile PDF</a>
-          {selP.profile_data?.jdFileName&&<div style={{fontSize:12,color:"#059669",border:"1.5px solid #bbf7d0",borderRadius:DS.radius.md,padding:"8px 16px",background:"#f0fdf4",fontFamily:DS.font.body,display:"inline-flex",alignItems:"center",gap:4}}>📎 Client JD: {selP.profile_data.jdFileName}</div>}
+          {selP.profile_data?.jdFilePath&&<button type="button" onClick={async()=>{try{const r=await fetch("/api/admin",{method:"POST",headers:{"Authorization":`Bearer ${localStorage.getItem("sb-access-token")}`,"Content-Type":"application/json"},body:JSON.stringify({action:"get_jd_url",file_path:selP.profile_data.jdFilePath})});const d=await r.json();if(d.url)window.open(d.url,"_blank")}catch(e){console.warn(e)}}} style={{fontSize:12,color:"#059669",border:"1.5px solid #bbf7d0",borderRadius:DS.radius.md,padding:"8px 16px",background:"#f0fdf4",fontFamily:DS.font.body,display:"inline-flex",alignItems:"center",gap:4,cursor:"pointer"}}>📎 Client JD: {selP.profile_data.jdFileName||"Download"}</button>}
         </div>
 
         <div style={{display:"grid",gridTemplateColumns:isMob?"1fr":"1fr 1fr",gap:20}}>
@@ -2017,7 +2025,12 @@ function ClientForm({user}){
   const tMH=(i)=>{if(mh.includes(i)){setMh(p=>p.filter(x=>x!==i));return}setNh(p=>p.filter(x=>x!==i));setMh(p=>[...p,i])};
   const tNH=(i)=>{if(nh.includes(i)){setNh(p=>p.filter(x=>x!==i));return}setMh(p=>p.filter(x=>x!==i));setNh(p=>[...p,i])};
 
-  const handleSubmit=async()=>{setSubm(true);const p=buildP();try{const html=await buildPDF(p,cl);const r=await saveToDB(p,cl,html);setPdfL(`${BASE_URL}/api/pdf/${r.id}`);setDone(true);try{await sendEmail(p,cl)}catch{};show("✅ Submitted!")}catch(e){show("⚠️ "+e.message)}finally{setSubm(false)}};
+  const handleSubmit=async()=>{setSubm(true);const p=buildP();try{const html=await buildPDF(p,cl);const r=await saveToDB(p,cl,html);setPdfL(`${BASE_URL}/api/pdf/${r.id}`);
+    // Upload JD file to storage if exists
+    if(upFile){try{const b64=await new Promise((res,rej)=>{const rd=new FileReader();rd.onload=()=>res(rd.result.split(",")[1]);rd.onerror=rej;rd.readAsDataURL(upFile)});
+      await fetch("/api/client",{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${localStorage.getItem("sb-access-token")}`},body:JSON.stringify({action:"upload_jd",profile_id:r.id,file_base64:b64,file_name:upFile.name,mime_type:upFile.type})});
+    }catch(e){console.warn("JD upload:",e)}}
+    setDone(true);try{await sendEmail(p,cl)}catch{};show("✅ Submitted!")}catch(e){show("⚠️ "+e.message)}finally{setSubm(false)}};
   const handlePreview=async()=>{show("⏳ Generating...");try{const h=await buildPDF(buildP(),cl);const w=window.open("");if(w){w.document.write(h);w.document.close()}}catch(e){show("⚠️ "+e.message)}};
 
   const handleUpload=async(file)=>{if(!file)return;if(file.size>10*1024*1024){setUpErr("Max 10MB.");return}if(!["application/pdf","image/png","image/jpeg","image/webp"].includes(file.type)){setUpErr("PDF, PNG, or JPG.");return}setUpFile(file);setUpErr("");setAnzing(true);setAnl(null);try{const b=await new Promise((r,j)=>{const f=new FileReader();f.onload=()=>r(f.result.split(",")[1]);f.onerror=j;f.readAsDataURL(file)});setAnl(JSON.parse((await analyzeDoc(b,file.type)).replace(/```json|```/g,"").trim()))}catch(e){setUpErr("Error: "+e.message)}finally{setAnzing(false)}};

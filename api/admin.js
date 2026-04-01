@@ -322,6 +322,17 @@ export default async function handler(req, res) {
       return res.status(200).json({ profile, assignments, documents: docs });
     }
 
+    // ═══ JD SIGNED URL ═══
+    if (action === "get_jd_url") {
+      const { file_path } = req.body;
+      if (!file_path) return res.status(400).json({ error: "file_path required" });
+      const r = await fetch(`${url}/storage/v1/object/sign/documents/${file_path}`, {
+        method: "POST", headers: { ...H }, body: JSON.stringify({ expiresIn: 3600 })
+      });
+      const d = await r.json();
+      return res.status(200).json({ url: d.signedURL ? `${url}/storage/v1${d.signedURL}` : null });
+    }
+
     // ═══ STORAGE URL (signed download URL) ═══
     if (action === "get_document_url") {
       const { file_path } = req.body;

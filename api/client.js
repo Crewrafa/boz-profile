@@ -16,9 +16,10 @@ export default async function handler(req, res) {
   const key = process.env.SUPABASE_SERVICE_KEY;
   if (!url || !key) return res.status(500).json({ error: "DB not configured" });
 
-  // Body size check
+  // Body size check (larger limit for JD upload)
+  const maxSize = req.body?.action === "upload_jd" ? 8000000 : MAX_BODY_SIZE;
   const bodyStr = JSON.stringify(req.body || {});
-  if (bodyStr.length > MAX_BODY_SIZE) return res.status(413).json({ error: "Request too large" });
+  if (bodyStr.length > maxSize) return res.status(413).json({ error: "Request too large" });
 
   // Auth
   const token = (req.headers.authorization || "").replace("Bearer ", "");
@@ -90,6 +91,32 @@ export default async function handler(req, res) {
       if (!r.ok) return res.status(200).json([]);
       const data = await r.json();
       return res.status(200).json(Array.isArray(data) ? data : []);
+    }
+
+    if (action === "upload_jd") {
+      const { profile_id, file_base64, file_name, mime_type } = req.body;
+      if (!profile_id || !file_base64 || !file_name) return res.status(400).json({ error: "profile_id, file_base64, file_name required" });
+      const buffer = Buffer.from(file_base64, "base64");
+      if (buffer.length > 5 * 1024 * 1024) return res.status(413).json({ error: "JD file too large (max 5MB)" });
+      const safeName = file_name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `jd/${profile_id}/${Date.now()}_${safeName}`;
+      const upRes = await fetch(`${url}/storage/v1/object/documents/${path}`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${key}`, "apikey": key, "Content-Type": mime_type || "application/octet-stream", "x-upsert": "true" },
+        body: buffer,
+      });
+      if (!upRes.ok) return res.status(500).json({ error: "JD upload failed" });
+      // Update profile_data with jd path
+      const pR = await fetch(`${url}/rest/v1/profiles?id=eq.${profile_id}&select=profile_data`, { headers: H });
+      const existing = (await pR.json())[0];
+      const pd = existing?.profile_data || {};
+      pd.jdFilePath = path;
+      pd.jdFileName = safeName;
+      await fetch(`${url}/rest/v1/profiles?id=eq.${profile_id}`, {
+        method: "PATCH", headers: { ...H, "Prefer": "return=minimal" },
+        body: JSON.stringify({ profile_data: pd })
+      });
+      return res.status(200).json({ ok: true, path });
     }
 
     return res.status(400).json({ error: "Unknown action" });
