@@ -295,6 +295,22 @@ export default async function handler(req, res) {
       return res.status(200).json({ url: `${url}/storage/v1${d.signedURL}` });
     }
 
+    // ═══ AUTHORIZE REVIEW LINK ═══
+    if (action === "authorize_review") {
+      const { profile_id, authorized } = req.body;
+      if (!profile_id) return res.status(400).json({ error: "profile_id required" });
+      // Read current profile_data, add flag
+      const pR = await fetch(`${url}/rest/v1/profiles?id=eq.${profile_id}&select=profile_data`, { headers: H });
+      const pD = (await pR.json())[0];
+      const pd = pD?.profile_data || {};
+      pd.reviewAuthorized = authorized !== false;
+      pd.reviewAuthorizedAt = authorized !== false ? new Date().toISOString() : null;
+      pd.reviewAuthorizedBy = admin.email;
+      await fetch(`${url}/rest/v1/profiles?id=eq.${profile_id}`, { method: "PATCH", headers: { ...H, "Prefer": "return=minimal" }, body: JSON.stringify({ profile_data: pd }) });
+      await fetch(`${url}/rest/v1/audit_log`, { method: "POST", headers: H, body: JSON.stringify({ action: authorized !== false ? "authorize_review" : "revoke_review", table_name: "profiles", record_id: profile_id, performed_by: admin.email, details: {} }) });
+      return res.status(200).json({ ok: true });
+    }
+
     return res.status(400).json({ error: "Unknown action" });
   } catch (e) {
     return res.status(500).json({ error: e.message });

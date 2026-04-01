@@ -37,6 +37,14 @@ export default async function handler(req, res) {
     ]);
     const profile = (await pR.json())[0];
     if (!profile) return res.status(404).send("Profile not found");
+    const pd = profile.profile_data || {};
+    
+    // Check if review is authorized
+    if (!pd.reviewAuthorized) {
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      return res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>BOZ — Not Ready</title><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'DM Sans',sans-serif;background:#f1f5f9;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}</style></head><body><div style="text-align:center;max-width:420px"><div style="font-size:28px;font-weight:800;color:#0D2550;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:1.5px;margin-bottom:8px">BOZ<span style="color:#22d3ee">.</span></div><div style="font-size:10px;color:#94a3b8;letter-spacing:3px;text-transform:uppercase;margin-bottom:32px">Verified Fit</div><div style="font-size:48px;margin-bottom:16px">🔒</div><div style="font-size:20px;font-weight:700;color:#0D2550;font-family:'Plus Jakarta Sans',sans-serif">Candidates Not Ready Yet</div><div style="font-size:14px;color:#64748b;margin-top:8px;line-height:1.6">Our team is still working on finding the best candidates for this position. You'll receive a notification when they're ready for your review.</div><div style="margin-top:24px;font-size:12px;color:#94a3b8">BOZ IT Staffing · Confidential</div></div></body></html>`);
+    }
+    
     const assignments = await aR.json();
 
     const candIds = assignments.map(a => a.candidate_id).filter(Boolean);
@@ -96,7 +104,7 @@ function buildReviewHTML(profile, assignments, docs, pd, e, profileId) {
     const stackScore = nh.length ? Math.round((niceMatch.length / nh.length) * 100) : 50;
     const engScore = c.english_level ? 80 : 50;
 
-    const softSkills = pd.softSkills || pd.recruiterReview || null;
+    const softSkills = pd.softSkills || null; // Only Ana's structured soft skills, never recruiter notes
 
     // Score bar helper
     const bar = (label, val, color) => `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;color:#475569">${label}</span><span style="font-size:12px;font-weight:700;color:${color}">${val}%</span></div><div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden"><div style="height:100%;width:${val}%;background:${color};border-radius:3px"></div></div></div>`;
@@ -139,7 +147,6 @@ function buildReviewHTML(profile, assignments, docs, pd, e, profileId) {
         ${softSkills.personality?.length ? `<div class="soft-row"><span class="soft-label">Personality</span><div class="tags-wrap">${softSkills.personality.map(t => `<span class="sk soft">${e(t)}</span>`).join("")}</div></div>` : ""}
         ${softSkills.keyStrengths?.length ? `<div class="soft-row"><span class="soft-label">Strengths</span><div class="tags-wrap">${softSkills.keyStrengths.map(t => `<span class="sk str">${e(t)}</span>`).join("")}</div></div>` : ""}
         ${softSkills.softSkillsSummary ? `<div style="font-size:12px;color:#475569;line-height:1.6;margin-top:8px;padding:10px 14px;background:#f8fafc;border-radius:8px">${e(softSkills.softSkillsSummary)}</div>` : ""}
-        ${softSkills.notes ? `<div style="font-size:12px;color:#7C2D12;line-height:1.6;margin-top:8px;padding:10px 14px;background:#FFF7ED;border-radius:8px;border:1px solid #FDBA74"><strong>Recruiter:</strong> ${e(softSkills.notes)}</div>` : ""}
       </div>` : ""}
 
       <div class="compliance">
