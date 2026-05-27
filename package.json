@@ -1,0 +1,39 @@
+{
+  "name": "erp-platform",
+  "private": true,
+  "version": "14.0.0",
+  "description": "Multi-role ERP platform — six user roles, AI-augmented hiring workflow, full ATS, finance margin analysis. Portfolio showcase.",
+  "type": "module",
+  "author": "Rafael Baez <psicologorafaelbaez@gmail.com> (https://github.com/Crewrafa)",
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Crewrafa/erp-platform.git"
+  },
+  "homepage": "https://github.com/Crewrafa/erp-platform#readme",
+  "keywords": [
+    "portfolio",
+    "saas",
+    "ats",
+    "staffing",
+    "react",
+    "vite",
+    "vercel",
+    "supabase",
+    "anthropic",
+    "claude"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.1"
+  }
+}
